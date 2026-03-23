@@ -94,6 +94,16 @@ except ImportError:
     HAS_FEEDPARSER = False
     print("⚠️  feedparser 未安装，RSS功能受限。运行: pip install feedparser")
 
+# Scrapling - 增强反爬能力
+try:
+    from scrapling.fetchers import StealthyFetcher, DynamicFetcher
+    HAS_SCRAPLING = True
+    print("✅ Scrapling 已安装，反爬功能已启用")
+except ImportError:
+    HAS_SCRAPLING = False
+    print("⚠️  Scrapling 未安装，反爬能力受限。运行: pip install scrapling")
+    print("   安装后可增强对雪球、36kr等难爬网站的支持")
+
 
 # ==================== 新闻源配置 ====================
 
@@ -423,6 +433,42 @@ class FinancialNewsFetcher:
 
         return False, None
 
+    # ==================== Scrapling 增强抓取 ====================
+
+    def _fetch_with_scrapling(self, url: str, source_name: str = "") -> Optional[str]:
+        """
+        使用 Scrapling 的 StealthyFetcher 抓取难爬的页面
+        绕过 Cloudflare、Turnstile 等反爬机制
+        """
+        if not HAS_SCRAPLING:
+            return None
+
+        try:
+            print(f"   🕷️  使用 Scrapling 绕过反爬 ({source_name})...")
+            # 使用 StealthyFetcher 绕过反爬
+            StealthyFetcher.adaptive = True
+            response = StealthyFetcher.fetch(url, headless=True, network_idle=True)
+            return response.text
+        except Exception as e:
+            print(f"   ⚠️  Scrapling 抓取失败: {e}")
+            return None
+
+    def _fetch_with_dynamic(self, url: str) -> Optional[str]:
+        """
+        使用 DynamicFetcher 抓取 JavaScript 渲染的页面
+        适用于 SPA 网站
+        """
+        if not HAS_SCRAPLING:
+            return None
+
+        try:
+            print(f"   🔄 使用 DynamicFetcher 渲染 JS...")
+            response = DynamicFetcher.fetch(url, wait_for_selector=".content", timeout=30)
+            return response.text
+        except Exception as e:
+            print(f"   ⚠️  DynamicFetcher 抓取失败: {e}")
+            return None
+
     # ==================== RSS 源抓取 ====================
 
     def _fetch_rss(self, source_key: str) -> List[Dict]:
@@ -540,7 +586,7 @@ class FinancialNewsFetcher:
         return news_list
 
     def fetch_xueqiu_api(self) -> List[Dict]:
-        """抓取雪球热榜API"""
+        """抓取雪球热榜API（带 Scrapling fallback）"""
         source = NewsSource.XUEQIU
         print(f"📰 正在抓取 {source['name']}...")
         news_list = []
@@ -581,11 +627,23 @@ class FinancialNewsFetcher:
                 print(f"   ✅ {source['name']}: {len(news_list)} 条")
                 self.fetch_stats["xueqiu"] = {"status": "success", "count": len(news_list)}
             else:
-                print(f"   ❌ {source['name']}: HTTP {response.status_code}")
+                # 如果普通请求失败，尝试使用 Scrapling
+                print(f"   ⚠️  普通请求失败 (HTTP {response.status_code})，尝试 Scrapling...")
+                html_content = self._fetch_with_scrapling("https://xueqiu.com/hq", "雪球")
+                if html_content:
+                    # 解析 HTML 内容（简化版）
+                    print(f"   🔄 使用 Scrapling 成功获取雪球页面")
+                    # 注意：HTML 解析需要根据实际页面结构调整
+                    # 这里暂不展开，留作后续优化
                 self.fetch_stats["xueqiu"] = {"status": "failed", "error": f"HTTP {response.status_code}"}
 
         except Exception as e:
             print(f"   ❌ {source['name']}: {e}")
+            # 尝试 Scrapling fallback
+            print(f"   🔄 尝试使用 Scrapling 作为备用方案...")
+            html_content = self._fetch_with_scrapling("https://xueqiu.com/hq", "雪球")
+            if html_content:
+                print(f"   ✅ Scrapling 备用方案成功")
             self.fetch_stats["xueqiu"] = {"status": "failed", "error": str(e)}
 
         return news_list
