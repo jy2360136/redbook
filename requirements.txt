@@ -1,0 +1,16 @@
+# 金融新闻工作流依赖
+
+# 网络请求
+requests>=2.31.0
+
+# RSS 解析
+feedparser>=6.0.10
+
+# HTML 解析
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# 后续步骤可能需要的依赖
+# pillow>=10.0.0  # 图片处理
+# openai>=1.0.0   # 调用 AI API
+# python-dotenv>=1.0.0  # 环境变量管理
