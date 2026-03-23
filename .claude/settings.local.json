@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(pip install -r requirements.txt -q)",
+      "Bash(python financial_news_workflow.py)",
+      "Bash(npx skills add https://github.com/op7418/Humanizer-zh.git)",
+      "Bash(git clone https://github.com/op7418/Humanizer-zh.git \"C:\\\\Users\\\\tdx\\\\.claude\\\\skills\\\\humanizer-zh\")",
+      "Bash(git clone https://github.com/obra/superpowers.git \"C:\\\\Users\\\\tdx\\\\.claude\\\\skills\\\\superpowers\")",
+      "Bash(npx skills add https://github.com/obra/superpowers.git --yes --global)",
+      "Bash(npx skills add https://github.com/vercel-labs/skills.git --yes --global)",
+      "Bash(python business_article_workflow.py --platform xiaohongshu)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh repo view Ninglo/remotelab --json name,description,url,defaultBranch,readme)",
+      "Bash(gh repo view Ninglo/remotelab --json name,description,url,readme)",
+      "Bash(gh repo view Ninglo/remotelab --json name,description,readme,url)",
+      "Bash(curl -s https://raw.githubusercontent.com/Ninglo/remotelab/main/README.md)",
+      "Bash(curl -s https://raw.githubusercontent.com/Ninglo/remotelab/master/README.md)",
+      "Bash(npm -v)",
+      "Bash(nvm list available)",
+      "Bash(nvm install 24.14.0)",
+      "Bash(nvm install 24)",
+      "Bash(nvm use 24.9.0)",
+      "Bash(python financial_news_workflow.py --days 2)",
+      "Bash(python -c \"import feedparser; print\\(''feedparser OK''\\)\")",
+      "Bash(python -c \"import requests; print\\(''requests OK''\\)\")",
+      "Bash(python china_financial_news_generator.py --company 本田 --event 利润暴跌)",
+      "Bash(python -m py_compile \"c:\\\\Users\\\\Administrator\\\\Desktop\\\\redbook\\\\china_financial_news_generator.py\")",
+      "Bash(python china_financial_news_generator_fixed.py --company 本田 --event 利润暴跌)",
+      "Bash(python china_financial_news_generator_simple.py --company 本田 --event 利润暴跌)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
