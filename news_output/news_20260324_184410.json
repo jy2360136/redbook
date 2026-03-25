@@ -1,0 +1,75 @@
+{
+  "fetch_time": "2026-03-24T18:44:10.024374",
+  "total": 9,
+  "by_source": {
+    "虎嗅网": 3,
+    "36 氪": 3,
+    "钛媒体": 2,
+    "界面新闻": 1
+  },
+  "news": [
+    {
+      "source": "虎嗅网",
+      "title": "抱紧英伟达，硬刚特斯拉：吉利的智驾“翻身仗”能成吗？",
+      "link": "http://www.huxiu.com/article/4843580.html?f=wangzhan",
+      "summary": "<img src=\"https://img.huxiucdn.com/article/cover/202603/19/175527838154.jpg\" />\n<p><span class=\"text-remarks\" label=\"备注\">出品|虎嗅汽车组</span></p><p><span class=\"text-remarks\" label=\"备注\">作者|杨杰</span></p><p>",
+      "published": "Fri, 20 Mar 2026 14:45:00 +0800"
+    },
+    {
+      "source": "虎嗅网",
+      "title": "新款小米SU7，“融冰”比销量更重要",
+      "link": "http://www.huxiu.com/article/4843852.html?f=wangzhan",
+      "summary": "<img src=\"https://img.huxiucdn.com/article/cover/202603/20/142017904206.jpg\" />\n<p><span class=\"text-remarks\" label=\"备注\">出品|虎嗅汽车组</span></p><p><span class=\"text-remarks\" label=\"备注\">作者|王亚骏</span></p><p",
+      "published": "Fri, 20 Mar 2026 14:43:49 +0800"
+    },
+    {
+      "source": "虎嗅网",
+      "title": "小米新SU7，雷军输不起",
+      "link": "http://www.huxiu.com/article/4843752.html?f=wangzhan",
+      "summary": "<img src=\"https://img.huxiucdn.com/article/cover/202603/20/135221316805.jpg\" />\n<p><span class=\"text-remarks\" label=\"备注\">本文来自微信公众号：</span><a href=\"https://mp.weixin.qq.com/s/8qf8TKoPfnus7JDnCneCKw\" re",
+      "published": "Fri, 20 Mar 2026 14:05:39 +0800"
+    },
+    {
+      "source": "36 氪",
+      "title": "马布里官方旗舰店入驻拼多多，“发光篮球”将登陆百亿补贴",
+      "link": "https://36kr.com/newsflashes/210944",
+      "summary": "36氪获悉，马布里官方旗舰店将入驻拼多多，“发光篮球”也将登陆百亿补贴。4月12日晚7点，马布里将在拼多多开启直播电商首秀。",
+      "published": "2020-04-11 16:11:27"
+    },
+    {
+      "source": "36 氪",
+      "title": "广东餐饮协会提议美团：取消独家条款，降佣5%及以上",
+      "link": "https://36kr.com/newsflashes/210939",
+      "summary": "36氪获悉，4月10日， 广东省餐饮服务行业协会发文称，疫情期间，收到数百家餐饮企业针对美团外卖的投诉，故发函代表行业提出书面交涉意见：美团应直接减免整个疫情期间广东省内所有餐饮商户外卖服务佣金5%或以上；同时，美团应立即取消独家合作限制等其他垄断条款，以便餐企承接来自更多平台的外卖订单。",
+      "published": "2020-04-11 14:06:24"
+    },
+    {
+      "source": "36 氪",
+      "title": "小鹏汽车一季度上险量2331台",
+      "link": "https://36kr.com/newsflashes/210938",
+      "summary": "36氪获悉，4月11日，根据中国汽车研究中心数据，2020年一季度小鹏G3总计上险量达到2331台，3月单月上险量达到1094台。",
+      "published": "2020-04-11 14:01:04"
+    },
+    {
+      "source": "钛媒体",
+      "title": "首次实现季度盈利，小鹏物理AI见成效｜财报眼",
+      "link": "https://www.tmtpost.com/7926830.html",
+      "summary": "刚赚3.8亿就投70亿AI，小鹏背后的思考",
+      "published": "Tue, 24 Mar 2026 17:41:32 +0800"
+    },
+    {
+      "source": "钛媒体",
+      "title": "茅台之下第一股，A股最贵的那颗芯片",
+      "link": "https://www.tmtpost.com/7926619.html",
+      "summary": "光芯片的寒武纪时刻",
+      "published": "Tue, 24 Mar 2026 15:05:54 +0800"
+    },
+    {
+      "source": "界面新闻",
+      "title": "小米2025年营收4573亿创新高",
+      "link": "https://www.jiemian.com/article/14157247.html",
+      "summary": "<img src=\"https://img.jiemian.com/101/original/20220307/164664251748738900_a580x330.png\" /><p></p>",
+      "published": "Tue, 24 Mar 2026 17:32:48 +0800"
+    }
+  ]
+}

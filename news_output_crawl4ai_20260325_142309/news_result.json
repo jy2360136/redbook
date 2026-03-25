@@ -1,0 +1,61 @@
+{
+  "fetch_time": "2026-03-25T14:23:09.201640",
+  "total": 7,
+  "by_source": {
+    "虎嗅网": 1,
+    "36 氪": 3,
+    "界面新闻": 2,
+    "极客公园": 1
+  },
+  "news": [
+    {
+      "source": "虎嗅网",
+      "title": "抱紧英伟达，硬刚特斯拉：吉利的智驾“翻身仗”能成吗？",
+      "link": "http://www.huxiu.com/article/4843580.html?f=wangzhan",
+      "summary": "<img src=\"https://img.huxiucdn.com/article/cover/202603/19/175527838154.jpg\" />\n<p><span class=\"text-remarks\" label=\"备注\">出品|虎嗅汽车组</span></p><p><span class=\"text-remarks\" label=\"备注\">作者|杨杰</span></p><p>",
+      "published": "Fri, 20 Mar 2026 14:45:00 +0800"
+    },
+    {
+      "source": "36 氪",
+      "title": "马布里官方旗舰店入驻拼多多，“发光篮球”将登陆百亿补贴",
+      "link": "https://36kr.com/newsflashes/210944",
+      "summary": "36氪获悉，马布里官方旗舰店将入驻拼多多，“发光篮球”也将登陆百亿补贴。4月12日晚7点，马布里将在拼多多开启直播电商首秀。",
+      "published": "2020-04-11 16:11:27"
+    },
+    {
+      "source": "36 氪",
+      "title": "广东餐饮协会提议美团：取消独家条款，降佣5%及以上",
+      "link": "https://36kr.com/newsflashes/210939",
+      "summary": "36氪获悉，4月10日， 广东省餐饮服务行业协会发文称，疫情期间，收到数百家餐饮企业针对美团外卖的投诉，故发函代表行业提出书面交涉意见：美团应直接减免整个疫情期间广东省内所有餐饮商户外卖服务佣金5%或以上；同时，美团应立即取消独家合作限制等其他垄断条款，以便餐企承接来自更多平台的外卖订单。",
+      "published": "2020-04-11 14:06:24"
+    },
+    {
+      "source": "36 氪",
+      "title": "小鹏汽车一季度上险量2331台",
+      "link": "https://36kr.com/newsflashes/210938",
+      "summary": "36氪获悉，4月11日，根据中国汽车研究中心数据，2020年一季度小鹏G3总计上险量达到2331台，3月单月上险量达到1094台。",
+      "published": "2020-04-11 14:01:04"
+    },
+    {
+      "source": "界面新闻",
+      "title": "外卖大战该结束了！美团-W飙升12%，阿里涨超6%，百亿港股互联网ETF华宝上探逾3%！",
+      "link": "https://www.jiemian.com/article/14161347.html",
+      "summary": "<img src=\"https://img.jiemian.com/101/original/ai/20260325/17744185932921300_a580x330.png\" /><p>科网龙头应声冲高，美团-W一度涨超12%，阿里巴巴-W盘中涨超6%。港股AI核心工具——港股互联网ETF华宝（513770）场内价格一度上探逾3%，现涨2.56%。</p>",
+      "published": "Wed, 25 Mar 2026 14:06:09 +0800"
+    },
+    {
+      "source": "界面新闻",
+      "title": "监管释放重要信号！美团股价大涨，距2024年10月最大回撤达60%",
+      "link": "https://www.jiemian.com/article/14161371.html",
+      "summary": "<img src=\"https://img.jiemian.com/101/original/ai/20260325/177441872811741800_a580x330.png\" /><p>3月25日午后，科网股集体大涨，“外卖三巨头”涨幅居前：美团一度拉涨超11%，阿里巴巴涨超5%，京东涨超4%。恒生互联网ETF（513330.SH）跟随上涨超3%。</p>",
+      "published": "Wed, 25 Mar 2026 14:06:01 +0800"
+    },
+    {
+      "source": "极客公园",
+      "title": "阿里财报的隐藏密码：开启 Token 战略，未来五年云 AI 收入年目标 1000 亿美元",
+      "link": "https://www.geekpark.net/news/361511",
+      "summary": "阿里财报的隐藏密码：开启 Token 战略，未来五年云 AI 收入年目标 1000 亿美元",
+      "published": "2026-03-25T14:22:36.012760"
+    }
+  ]
+}

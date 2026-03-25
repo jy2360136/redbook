@@ -33,7 +33,18 @@
       "Bash(git branch:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(pip install:*)",
+      "Read(//d /Users/tdx/Desktop/**)",
+      "Bash(python test_news_sources.py)",
+      "Bash(python c:/Users/tdx/Desktop/redbook/test_news_sources.py)",
+      "Bash(python c:/Users/tdx/Desktop/redbook/financial_news_7sources.py --days 3)",
+      "Bash(python c:/Users/tdx/Desktop/redbook/financial_news_workflow_crawl4ai.py --days 3)",
+      "Bash(python c:/Users/tdx/Desktop/redbook/test_playwright.py)",
+      "Bash(python -c \":*)",
+      "Bash(python c:/Users/tdx/Desktop/redbook/news_crawler.py --days 3 --output c:/Users/tdx/Desktop/redbook/news_output)",
+      "Bash(python c:/Users/tdx/Desktop/redbook/news_crawler.py --days 3)",
+      "Bash(ls -la c:/Users/tdx/Desktop/redbook/*.py)"
     ]
   }
 }
