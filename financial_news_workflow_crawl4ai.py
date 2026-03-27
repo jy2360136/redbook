@@ -67,14 +67,16 @@ FAMOUS_COMPANIES = [
 ]
 
 # 公司名过滤模块（暂时禁用，等待后续重构）
+
+
 def filter_by_companies(title: str, companies: list = None) -> bool:
     """
     根据公司名过滤标题
-    
+
     Args:
         title: 新闻标题
         companies: 公司名列表，为 None 时使用 FAMOUS_COMPANIES
-    
+
     Returns:
         bool: 是否包含公司名
     """
@@ -89,39 +91,218 @@ HEADERS = {
 }
 
 
+def batch_fetch_huxiu_times(news_list: List[Dict]) -> List[Dict]:
+    """
+    批量获取虎嗅文章的真实发布时间
+    从 https://www.huxiu.com/article/ 页面直接提取所有文章的时间
+
+    Args:
+        news_list: 新闻列表
+
+    Returns:
+        更新后的新闻列表
+    """
+    try:
+        from playwright.sync_api import sync_playwright
+
+        # 收集所有虎嗅文章的 URL
+        huxiu_articles = [n for n in news_list if n.get("source") == "虎嗅网"]
+
+        if not huxiu_articles:
+            return news_list
+
+        print(f"  发现 {len(huxiu_articles)} 篇虎嗅文章，正在获取真实发布时间...")
+
+        # 启动浏览器
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+            page = context.new_page()
+
+            # 访问文章列表页
+            print("  正在访问 https://www.huxiu.com/article/...")
+            page.goto("https://www.huxiu.com/article/",
+                      wait_until="networkidle", timeout=30000)
+
+            # 滚动加载所有文章
+            print("  正在滚动加载更多文章...")
+            last_height = page.evaluate("() => document.body.scrollHeight")
+            max_scrolls = 50  # 最多滚动 50 次
+            scrolls = 0
+
+            while scrolls < max_scrolls:
+                # 滚动到底部
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                page.wait_for_timeout(2000)  # 等待 2 秒加载新内容
+
+                new_height = page.evaluate("() => document.body.scrollHeight")
+                if new_height == last_height:
+                    # 没有更多内容了
+                    break
+                last_height = new_height
+                scrolls += 1
+                print(
+                    f"    已滚动 {scrolls} 次，当前文章数：{len(page.query_selector_all('.card'))}")
+
+            print(f"  滚动完成，共滚动 {scrolls} 次")
+
+            # 提取所有文章的链接和时间
+            # HTML 结构：<div class="bottom-line__time">3 小时前</div>
+            articles_data = page.evaluate('''
+                () => {
+                    const items = document.querySelectorAll('.card');
+                    const result = [];
+                    items.forEach(item => {
+                        const linkElem = item.querySelector('a[href*="/article/"]');
+                        const timeElem = item.querySelector('.bottom-line__time');
+                        if (linkElem && timeElem) {
+                            result.push({
+                                url: linkElem.href,
+                                time: timeElem.textContent.trim()
+                            });
+                        }
+                    });
+                    return result;
+                }
+            ''')
+
+            browser.close()
+
+            # 创建 URL 到时间的映射
+            time_map = {item['url']: item['time'] for item in articles_data}
+            print(f"  从列表页提取到 {len(time_map)} 篇文章的时间")
+
+            # 更新时间到新闻列表
+            matched = 0
+            for article in huxiu_articles:
+                url = article.get("link")
+                if url in time_map:
+                    article["published"] = time_map[url]
+                    matched += 1
+                else:
+                    # 如果找不到，使用当前时间
+                    article["published"] = datetime.now().isoformat()
+
+            print(f"  ✅ 成功匹配 {matched}/{len(huxiu_articles)} 篇文章的时间")
+
+    except Exception as e:
+        print(f"  ❌ 批量获取失败：{e}")
+        # 出错时给所有虎嗅文章设置当前时间
+        for article in news_list:
+            if article.get("source") == "虎嗅网":
+                article["published"] = datetime.now().isoformat()
+
+    return news_list
+
 # ==================== 各网站专用爬虫 ====================
 
+
 class SourceHuxiu:
-    """虎嗅网 - RSS"""
+    """虎嗅网 - 直接调用 API（已攻克 WAF）"""
     name = "虎嗅网"
 
     @staticmethod
     def fetch(days: int = 3, filter_companies: bool = False) -> List[Dict]:
-        if not HAS_FEEDPARSER:
-            return []
+        """
+        通过 API 获取虎嗅文章
+
+        Args:
+            days: 获取最近几天的文章（暂未实现时间过滤）
+            filter_companies: 是否过滤公司名
+
+        Returns:
+            文章列表
+        """
+        api_url = "https://api-article.huxiu.com/web/channel/articleListV1"
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+            "Referer": "https://www.huxiu.com/",
+            "Origin": "https://www.huxiu.com",
+            "Accept": "application/json",
+            "Accept-Language": "zh-CN,zh;q=0.9",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
         news_list = []
-        try:
-            feed = feedparser.parse("https://www.huxiu.com/rss/0.xml")
-            for entry in feed.entries[:50]:
-                title = entry.get("title", "")
-                # 可选的公司名过滤
-                if filter_companies and not filter_by_companies(title):
-                    continue
-                news_list.append({
-                    "source": "虎嗅网",
-                    "title": title,
-                    "link": entry.get("link", ""),
-                    "summary": entry.get("summary", "")[:200],
-                    "published": entry.get("published", ""),
-                })
-        except Exception as e:
-            print(f"虎嗅网错误：{e}")
+        last_id = ""
+        max_pages = 50  # 最多获取 50 页（约 1200 篇）
+
+        print("  正在通过 API 获取文章...")
+
+        for page in range(max_pages):
+            # 构造 POST 数据
+            data = f"platform=www&channel_id=0&last_id={last_id}" if last_id else "platform=www&channel_id=0"
+
+            try:
+                response = requests.post(
+                    api_url, headers=headers, data=data, timeout=10)
+
+                if response.status_code != 200:
+                    print(f"  ❌ 第{page+1}页请求失败：{response.status_code}")
+                    break
+
+                result = response.json()
+
+                if not result.get("success"):
+                    print(f"  ❌ API 返回失败：{result.get('message')}")
+                    break
+
+                # 解析数据
+                data_content = result.get("data", {})
+                datalist = data_content.get("datalist", [])
+
+                if not datalist:
+                    print(f"  ✅ 已无更多内容")
+                    break
+
+                # 提取文章
+                for item in datalist:
+                    aid = item.get("aid")
+                    title = item.get("title", "")
+                    url = item.get(
+                        "url", f"https://www.huxiu.com/article/{aid}.html")
+
+                    # 确保 URL 格式正确
+                    if not url.startswith("http"):
+                        url = f"https://www.huxiu.com/article/{aid}.html"
+
+                    # 公司名过滤
+                    if filter_companies and not filter_by_companies(title):
+                        continue
+
+                    news_list.append({
+                        "source": "虎嗅网",
+                        "title": title,
+                        "link": url,
+                    })
+
+                print(
+                    f"  第{page+1}页：获取到 {len(datalist)} 篇文章，共 {len(news_list)} 篇")
+
+                # 更新 last_id
+                last_id = data_content.get("last_id", "")
+
+                if not last_id:
+                    print(f"  ✅ 已获取所有文章")
+                    break
+
+            except Exception as e:
+                print(f"  ❌ 错误：{e}")
+                break
+
+        print(f"  成功抓取 {len(news_list)} 条")
         return news_list
 
 
+class SourceLatePost:
+    """晚点 LatePost - Playwright 动态抓取"""
+    name = "晚点 LatePost"
+
+
 class Source36kr:
-    """36 氪 - API"""
-    name = "36 氪"
 
     @staticmethod
     def fetch(days: int = 3, filter_companies: bool = False) -> List[Dict]:
@@ -375,9 +556,16 @@ def fetch_all(sources: List[str], days: int, filter_companies: bool = False) -> 
     for src in sources:
         if src in source_map:
             print(f"\n正在抓取：{source_map[src].name}...")
-            news = source_map[src].fetch(days=days, filter_companies=filter_companies)
+            news = source_map[src].fetch(
+                days=days, filter_companies=filter_companies)
             print(f"  抓到 {len(news)} 条")
             all_news.extend(news)
+
+    # 批量获取虎嗅文章的发布时间
+    if "huxiu" in sources:
+        print("\n正在获取虎嗅文章的真实发布时间...")
+        all_news = batch_fetch_huxiu_times(all_news)
+
     return all_news
 
 
@@ -407,7 +595,7 @@ def main():
     parser.add_argument("--days", type=int, default=3, help="抓取近 X 天")
     parser.add_argument("--sources", type=str, default="all", help="来源，逗号分隔")
     parser.add_argument("--output", type=str, default=".", help="输出目录")
-    parser.add_argument("--filter-companies", action="store_true", default=False, 
+    parser.add_argument("--filter-companies", action="store_true", default=False,
                         help="是否启用公司名过滤（默认关闭，抓取所有新闻）")
     args = parser.parse_args()
 
@@ -426,7 +614,8 @@ def main():
     print(f"公司名过滤：{'✅ 开启' if args.filter_companies else '❌ 关闭'}")
 
     # 抓取
-    all_news = fetch_all(sources, args.days, filter_companies=args.filter_companies)
+    all_news = fetch_all(sources, args.days,
+                         filter_companies=args.filter_companies)
 
     # 去重
     seen = set()

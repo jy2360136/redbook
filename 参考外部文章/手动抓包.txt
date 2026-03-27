@@ -1,0 +1,366 @@
+第一次进入到https://www.huxiu.com/article/
+请求网址
+https://api-article.huxiu.com/web/channel/articleListV1
+请求方法
+POST
+状态代码
+200 OK
+远程地址
+127.0.0.1:7897
+引荐来源网址政策
+strict-origin-when-cross-origin
+access-control-allow-credentials
+true
+access-control-allow-headers
+X-Requested-With
+access-control-allow-headers
+Cache-Control
+access-control-allow-methods
+GET,POST,OPTIONS
+access-control-allow-origin
+https://www.huxiu.com
+content-encoding
+gzip
+content-type
+text/html; charset=UTF-8
+date
+Fri, 27 Mar 2026 06:20:03 GMT
+server
+nginx
+vary
+Accept-Encoding
+x-powered-by
+PHP/7.1.33
+:authority
+api-article.huxiu.com
+:method
+POST
+:path
+/web/channel/articleListV1
+:scheme
+https
+accept
+application/json
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+zh-CN,zh;q=0.9
+cache-control
+no-cache
+content-length
+44
+content-type
+application/x-www-form-urlencoded
+cookie
+huxiu_analyzer_wcy_id=9woz7f3ibje86vkzou; Hm_lvt_502e601588875750790bbe57346e972b=1772614080,1774329555; HMACCOUNT=CBAEA08C29DD12C5; _clck=7s5ols%5E2%5Eg4p%5E0%5E2254; _clsk=65meqw%5E1774592379764%5E5%5E0%5Es.clarity.ms%2Fcollect; Hm_lpvt_502e601588875750790bbe57346e972b=1774592402
+origin
+https://www.huxiu.com
+pragma
+no-cache
+priority
+u=1, i
+referer
+https://www.huxiu.com/
+sec-ch-ua
+"Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-site
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+
+预览的消息是
+{success: true,…}
+data
+: 
+{name: "全部", datalist: [{aid: "4845924", title: "到哪都要转机，武汉还是国际枢纽吗？", summary: "",…},…],…}
+datalist
+: 
+[{aid: "4845924", title: "到哪都要转机，武汉还是国际枢纽吗？", summary: "",…},…]
+0
+: 
+{aid: "4845924", title: "到哪都要转机，武汉还是国际枢纽吗？", summary: "",…}
+1
+: 
+{aid: "4845922", title: "“孤独”一人食，正悄悄“溶解”，浙南你我的熟人饭局？", summary: "",…}
+2
+: 
+{aid: "4845921", title: "当AI接管了作业，教育评价该如何透视“思维过程” ？", summary: "",…}
+3
+: 
+{aid: "4845918", title: "堆推理链全错了，林俊旸离职首曝：曾在阿里Qwen 踩中一个“致命”技术误区", summary: "",…}
+4
+: 
+{aid: "4845915", title: "特朗普剑指哈瓦那，古巴著名歌手已备好猎枪", summary: "",…}
+5
+: 
+{aid: "4845913", title: "白瞎了我苦练的PPT快捷键", summary: "",…}
+6
+: 
+{aid: "4845912", title: "影武堂x 长角鹿：精品动作短剧，没有金手指，但有真拳头", summary: "",…}
+7
+: 
+{aid: "4845911", title: "萨克斯对话吴晓求：2035年，中国会超越美国吗？", summary: "",…}
+8
+: 
+{aid: "4845908", title: "比起军事合作，卢卡申科访朝的意义更体现在这一点上", summary: "",…}
+9
+: 
+{aid: "4845907", title: "“史地化生”退出中考，学生反而更累了？", summary: "",…}
+10
+: 
+{aid: "4845904", title: "“擦边”的世界冠军吴柳芳，终于还清了债", summary: "",…}
+11
+: 
+{aid: "4845902", title: "张雪峰的“圣化”，说明了什么", summary: "",…}
+12
+: 
+{aid: "4845896", title: "农商行“一哥”日赚3322万元，现金分红超36亿元，渝农商行股息率达4.49%", summary: "",…}
+13
+: 
+{aid: "4843572", title: "“9系“的牌桌上，还有大众的座位吗？", summary: "大众低头，不等于能站起来",…}
+14
+: 
+{aid: "4845892", title: "不解决这个问题，所有的“IP系列化开发”都是假把式", summary: "",…}
+15
+: 
+{aid: "4845865", title: "泡泡玛特：其实我都不知道怎么复制自己", summary: "Labubu的爆红，纯属不可复制的意外之喜",…}
+16
+: 
+{aid: "4845889", title: "中国航司不只是航空公司", summary: "", url: "https://www.huxiu.com/article/4845889.html",…}
+17
+: 
+{aid: "4845888", title: "一款神药，卖了152亿", summary: "", url: "https://www.huxiu.com/article/4845888.html",…}
+18
+: 
+{aid: "4845886", title: "OpenAI败给千问，聊天框里长不出收银台", summary: "",…}
+19
+: 
+{aid: "4845661", title: "谁还关心知乎的死活？", summary: "互联网可以有无数个盈利平台，却只有一个知乎",…}
+20
+: 
+{aid: "4845883", title: "Kimi和阶跃，争抢“龙虾第一股”", summary: "",…}
+21
+: 
+{aid: "4845880", title: "那天下雨了，我的同事被蒸馏成了token", summary: "",…}
+22
+: 
+{aid: "4845879", title: "苹果想靠Siri 再造一个App Store：谁赞成，谁反对？", summary: "",…}
+last_id
+: 
+"1774578125"
+name
+: 
+"全部"
+share_info
+: 
+{share_title: "全部", share_url: "https://m.huxiu.com/channel/0.html", share_desc: "",…}
+share_desc
+: 
+""
+share_img
+: 
+"https://static.huxiucdn.com/common/image/logo/logo_200.png"
+share_title
+: 
+"全部"
+share_url
+: 
+"https://m.huxiu.com/channel/0.html"
+message
+: 
+"请求成功"
+success
+: 
+true
+
+然后我鼠标往下滚动，看到又调用了https://api-article.huxiu.com/web/channel/articleListV1
+请求网址
+https://api-article.huxiu.com/web/channel/articleListV1
+请求方法
+POST
+状态代码
+200 OK
+远程地址
+127.0.0.1:7897
+引荐来源网址政策
+strict-origin-when-cross-origin
+access-control-allow-credentials
+true
+access-control-allow-headers
+X-Requested-With
+access-control-allow-headers
+Cache-Control
+access-control-allow-methods
+GET,POST,OPTIONS
+access-control-allow-origin
+https://www.huxiu.com
+content-encoding
+gzip
+content-type
+text/html; charset=UTF-8
+date
+Fri, 27 Mar 2026 06:25:48 GMT
+server
+nginx
+vary
+Accept-Encoding
+x-powered-by
+PHP/7.1.33
+:authority
+api-article.huxiu.com
+:method
+POST
+:path
+/web/channel/articleListV1
+:scheme
+https
+accept
+application/json
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+zh-CN,zh;q=0.9
+cache-control
+no-cache
+content-length
+44
+content-type
+application/x-www-form-urlencoded
+cookie
+huxiu_analyzer_wcy_id=9woz7f3ibje86vkzou; Hm_lvt_502e601588875750790bbe57346e972b=1772614080,1774329555; HMACCOUNT=CBAEA08C29DD12C5; _clck=7s5ols%5E2%5Eg4p%5E0%5E2254; Hm_lpvt_502e601588875750790bbe57346e972b=1774592402; _clsk=65meqw%5E1774592405102%5E6%5E0%5Es.clarity.ms%2Fcollect
+origin
+https://www.huxiu.com
+pragma
+no-cache
+priority
+u=1, i
+referer
+https://www.huxiu.com/
+sec-ch-ua
+"Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-site
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+
+{success: true,…}
+data
+: 
+{name: "全部", datalist: [{aid: "4845875", title: "超额认购1073倍，德适引爆港股，医疗AI大模型价值兑现", summary: "",…},…],…}
+datalist
+: 
+[{aid: "4845875", title: "超额认购1073倍，德适引爆港股，医疗AI大模型价值兑现", summary: "",…},…]
+0
+: 
+{aid: "4845875", title: "超额认购1073倍，德适引爆港股，医疗AI大模型价值兑现", summary: "",…}
+1
+: 
+{aid: "4845873", title: "中国科协最新声明与抵制：NeurIPS的“逐客令”，让全球AI研究陷入“双轨制”", summary: "",…}
+2
+: 
+{aid: "4845869", title: "枸杞别担心", summary: "", url: "https://www.huxiu.com/article/4845869.html",…}
+3
+: 
+{aid: "4845866", title: "又一新势力宣告破产，跨界造车真的不行吗？", summary: "",…}
+4
+: 
+{aid: "4845862", title: "张雪峰一走，中年人终于乖乖吃起了水煮鸡胸肉", summary: "",…}
+5
+: 
+{aid: "4845857", title: "“国产伟哥”光环褪去？白云山金戈去年少卖近800万片，已连续两年下滑，销售量最高时曾一年卖出超1亿片", summary: "",…}
+6
+: 
+{aid: "4845856", title: "困在“小龙头”里的酱菜行业，靠什么迈过5亿门槛、走向全国？", summary: "",…}
+7
+: 
+{aid: "4845854", title: "中法航线，正在“下沉”", summary: "", url: "https://www.huxiu.com/article/4845854.html",…}
+8
+: 
+{aid: "4845853", title: "手搓赛高，这动画，每一帧都是“人肉”油画味~", summary: "",…}
+9
+: 
+{aid: "4845851", title: "林俊旸看到了什么", summary: "", url: "https://www.huxiu.com/article/4845851.html",…}
+10
+: 
+{aid: "4845848", title: "和淮海755“再见”，到“在张园见”，MUJI的近期动作", summary: "",…}
+11
+: 
+{aid: "4845846", title: "湾区中产，为什么开始去佛山“深活”？", summary: "",…}
+12
+: 
+{aid: "4845843", title: "国际奥组会禁止跨性别运动员参加奥运会，曾被学术界抨击的性别检测重出江湖", summary: "",…}
+13
+: 
+{aid: "4845840", title: "王兴用234亿亏损证明了一件事", summary: "",…}
+14
+: 
+{aid: "4845839", title: "五涨停背后，大胜达9.88亿交易盲盒待拆", summary: "",…}
+15
+: 
+{aid: "4845837", title: "好好演戏的“东北全智贤”，这次翻身了？", summary: "",…}
+16
+: 
+{aid: "4845836", title: "邱兵/川普支持率创新低", summary: "", url: "https://www.huxiu.com/article/4845836.html",…}
+17
+: 
+{aid: "4845835", title: "硅谷亿万富翁警告：25岁选错城市，你的年薪天花板已被焊死……", summary: "",…}
+18
+: 
+{aid: "4845834", title: "20岁小伙“骑老头下山”？", summary: "",…}
+19
+: 
+{aid: "4845833", title: "那个总说“我不行”的孩子，心里到底在想什么？", summary: "",…}
+20
+: 
+{aid: "4845832", title: "杀人无数的剧毒豆子，意外催生了一项诺奖发现", summary: "",…}
+21
+: 
+{aid: "4845822", title: "拉丁美洲，正在重造金钱", summary: "拉丁美洲所有的魔幻叙事中，隐秘的支付网络尤为危险且迷人",…}
+22
+: 
+{aid: "4845831", title: "Jim Keller揭秘RISC-V的趋势：CPU必须和AI在一起", summary: "",…}
+last_id
+: 
+"1774568325"
+name
+: 
+"全部"
+share_info
+: 
+{share_title: "全部", share_url: "https://m.huxiu.com/channel/0.html", share_desc: "",…}
+share_desc
+: 
+""
+share_img
+: 
+"https://static.huxiucdn.com/common/image/logo/logo_200.png"
+share_title
+: 
+"全部"
+share_url
+: 
+"https://m.huxiu.com/channel/0.html"
+message
+: 
+"请求成功"
+success
+: 
+true
+
+我发现他每次都是取出来22篇文章左右，有点像是分页逻辑，但是我不知道他这具体的分页逻辑是怎样的，你猜测一下他的处理逻辑？
