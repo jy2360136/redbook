@@ -62,17 +62,74 @@ npx playwright install chromium
 
 #### 支持的媒体源
 
-**虎嗅网（v1.2.0 已优化）**：
+**虎嗅网（v1.3.0 已优化）**：
 
-- 使用官方 API 直接获取，无需浏览器
-- 支持获取约 1200 篇历史文章
-- 发布时间从列表页提取，使用相对时间格式
-- 性能：100% 时间匹配率，10 倍性能提升
+- 使用官方 API 获取文章列表
+- Playwright 批量提取发布时间（相对时间格式）
+- 智能时间过滤：动态判断是否继续滚动
+- 性能：100% 时间匹配率，智能停止滚动
 
-**其他来源**：
+**36 氪（v2.0.0 已优化）**：
 
-- 36 氪、钛媒体、极客公园、界面新闻、澎湃新闻等
-- 使用 RSS、API 或 Playwright 方式抓取
+- **新增独立实时爬虫脚本** `crawl_36kr_realtime.py`：
+  - **边滚动边保存**：每次滚动后立即提取并实时写入 JSON 文件
+  - **智能时间停止**：检测到文章发布时间超过指定天数，立即停止滚动
+  - **纯 Playwright 硬核模式**：不依赖 RSS 和 API，完全模拟人类浏览行为
+  - **自动破解验证码**：字节跳动滑块验证码 + 自动点击"查看更多"按钮
+  - **输出文件**：`36kr_realtime_时间戳.json`
+
+- **旧版主脚本** `financial_news_workflow_crawl4ai.py`（v1.9.0）：
+  - **RSS + API + Playwright 三管齐下**，即使 IP 被限制也能稳定获取文章
+  - **RSS Feed**：`https://www.36kr.com/feed`，30 篇文章，无验证码
+  - **Gateway API**：热榜 16 篇，无需浏览器
+  - **Playwright 兜底**：带完整诊断 + 人类滚动 + iframe 滑块破解
+
+- **核心功能**（v2.0.0）：
+  - **诊断模式**：自动截图 + 保存 HTML 到 `36kr_debug/` 文件夹，便于调试分析
+  - **人类滚动**：随机鼠标移动 + 大段滚动（800-1500px）+ 随机停顿（2.0-5.0 秒），大幅降低验证码触发
+  - **OpenCV 缺口检测**：Canny 边缘检测 + 模板匹配，精准计算滑块缺口位置
+  - **人类拖动轨迹**：贝塞尔曲线（加速度）+ 随机抖动（±4.5px）+ 到达后微调，模拟真实人类行为
+  - **iframe 滑块破解**：`frame_locator` 定位字节跳动验证码，多选择器尝试，自动刷新重试
+  - **持久化 Context**：保存登录状态到 `36kr_state.json`，Stealth 反检测，中国浏览器指纹
+  - **自动点击"查看更多"**：检测并点击页面底部的"查看更多"按钮，每次点击加载 30 篇新文章，最多点击 6 次
+  - **智能时间筛选**：自动提取文章发布时间（支持"X 分钟前"、"昨天"、"2026-03-27"等格式），根据 `--days` 参数过滤超时文章
+- **验证码处理**：检测 `#captcha_container` 中的 iframe，OpenCV 缺口识别 + 人类拖动轨迹
+- **时间格式支持**：
+  - 相对时间："X 分钟前"、"X 小时前"、"X 天前"、"昨天"、"今天"、"前天"、"刚刚"
+  - 绝对日期："2026-03-27"、"2026/03/27"、"03-27"、"3 月 27 日"
+  - 带时间的绝对日期："2026-03-27 14:30"
+- **性能**：
+  - v1.6.0: 3 天限制获取 113 篇（RSS 30 + API 65 + Playwright 18），生成 18 个调试文件，0 次验证码触发
+  - v1.8.0: 自动点击"查看更多"6 次，加载 210 篇文章（30→60→90→...→210）
+  - v1.9.0: 时间过滤 15 篇超时文章，最终获取 248 篇（去重后 239 篇）
+  - **v2.0.0**: 纯 Playwright 实时保存，218 篇，实时写入 JSON 文件 6 次
+
+**钛媒体（v2.2.0 已优化）**：
+
+- **独立实时爬虫脚本** `crawl_tmtpost_realtime.py`：
+  - **边滚动边保存**：每次滚动后立即提取并实时写入 JSON 文件
+  - **智能时间停止**：检测到文章发布时间超过指定天数，立即停止滚动
+  - **视频新闻过滤**：只保留文字新闻，自动过滤 `/video/` 链接
+  - **输出文件**：`tmtpost_realtime_时间戳.json`
+
+- **主脚本** `financial_news_workflow_crawl4ai.py`：
+  - Playwright 滚动加载，支持视频过滤
+  - 提取 `.type-post` 类文章，过滤 `.type-video-article`
+
+- **核心功能**：
+  - 视频过滤：检测链接是否包含 `/video/`，视频新闻直接跳过
+  - 时间提取：从 `._time.newTime` 元素提取发布时间
+  - 智能滚动：随机鼠标移动 + 大段滚动 + 随机停顿
+
+- **性能**：
+  - 5天模式：抓取 21 篇文字新闻
+  - 视频过滤：100% 过滤，0 篇视频混入
+  - 时间检测：自动停止，符合要求
+
+**界面新闻（v2.2.0 保留）**：
+
+- RSS 方式：`https://a.jiemian.com/index.php?m=article&a=rss`
+- 稳定可靠，50 篇文章
 
 #### 运行命令
 
@@ -80,17 +137,17 @@ npx playwright install chromium
 # 基本用法
 python financial_news_workflow_crawl4ai.py --days <天数> --sources <来源>
 
-# 示例：抓取近 10 天的虎嗅网和第一财经新闻
-python financial_news_workflow_crawl4ai.py --days 10 --sources huxiu,yicai
+# 示例：抓取近 5 天的钛媒体文字新闻（过滤视频）
+python crawl_tmtpost_realtime.py --days 5
 
-# 示例：抓取所有来源的新闻
+# 示例：抓取近 10 天的虎嗅网和钛媒体新闻
+python financial_news_workflow_crawl4ai.py --days 10 --sources huxiu,tmtpost
+
+# 示例：抓取所有来源的新闻（4个高质量源）
 python financial_news_workflow_crawl4ai.py --days 7 --sources all
 
 # 示例：指定输出目录
 python financial_news_workflow_crawl4ai.py --days 5 --sources huxiu,36kr --output ./output
-
-# 示例：使用固定输出目录
-python financial_news_workflow_crawl4ai.py --days 3 --sources yicai,jiemian --fixed-output ./news_output
 ```
 
 #### 参数说明
@@ -207,13 +264,33 @@ python community_crawler.py --keyword "腾讯" --sources zhihu --output ./commun
 - 尝试使用 `--sources` 参数指定更少的来源
 - 查看命令行输出的错误信息
 
-#### 问题 2: Playwright 浏览器启动失败
+#### 问题 2: 36 氪爬取失败（被限流）
+
+- **现象**：Playwright 返回 0 篇文章，或提示验证码处理失败
+- **影响**：仅影响 Playwright 部分，RSS + API 不受影响
+- **原因**：36 氪对连续快速访问非常敏感，会触发 iframe 滑块验证码
+- **解决方法**：
+  - v1.5.0 已采用 RSS + API + Playwright 混合策略
+  - 即使 Playwright 被拦截，RSS + API 仍可获取 96 篇文章
+  - 建议每天爬取 1-2 次，避免频繁访问触发限流
+
+#### 问题 3: Playwright 浏览器启动失败
 
 - 确保已运行 `npx playwright install chromium`
 - 检查系统是否有足够的权限
 - 尝试以管理员身份运行命令
 
-#### 问题 3: 依赖安装失败
+#### 问题 4: 36 氪验证码处理失败
+
+- **现象**：提示"未找到滑块按钮"
+- **原因**：验证码 HTML 结构变化或选择器不匹配
+- **解决方法**：
+  - 程序会自动截图调试（captcha*debug*\*.png）
+  - 检查截图中的验证码结构
+  - 已支持多种选择器：`.captcha-slider-btn`、`.dragger-item`、`.captcha_verify_slide--button` 等
+  - 如仍失败，请查看截图文件分析原因
+
+#### 问题 5: 依赖安装失败
 
 - 确保pip版本是最新的：`pip install --upgrade pip`
 - 尝试使用 `--only-binary :all:` 安装依赖：`pip install --only-binary :all: -r requirements.txt`

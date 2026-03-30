@@ -1,0 +1,183 @@
+是的，stealth 插件 仍然必须保留（甚至是整个方案里最重要的一环）。  原因：36氪的反爬机制是**“风险评分”**，不是只看是否登录。  即使你不需要登录，网站依然会通过浏览器指纹（webdriver、canvas、WebGL、字体、音频、硬件并发等）+ 行为特征（鼠标轨迹、滚动速度、刷新频率）来判断你是 bot。  
+你上次关 VPN 后第一次干净，但多刷几次就弹验证码，就是因为指纹 + 行为把风险分拉高了。  
+不加 stealth，即使是真实中国 IP，自动化脚本也会被立刻识别为 bot，验证码出现频率会远高于你手动操作。
+
+Cookie / Session：
+Cookie/会话 ：
+你说得对，36氪不需要登录，所以不用保存登录态。
+但强烈建议仍然使用持久化 Context（storage_state）。
+原因：它能保存网站发给你的反爬 token、session id、风险评分 cookie。
+同一个 context 重复使用，风险分会越来越低；每次新开 context 相当于“新设备”，风险分反而更高。
+（实际效果：用同一个 state.json 能让验证码出现频率再降低 50% 以上）完整需求说明书（直接复制发给你的 Agent）项目名称：Playwright 自动化爬取 36氪新闻列表（稳定绕过滑块验证码）目标页面：https://36kr.com/information/web_news/
+目标页面 ： https://36kr.com/information/web_news/核心需求：使用 Playwright（Python）以真实用户行为访问页面，尽可能降低验证码触发频率。
+当出现“请完成下列验证后继续” + “按住左边按钮拖动完成上方拼图”滑块验证码时，自动识别并完成拖动。
+成功通过验证码后，继续正常提取新闻列表（标题、链接、摘要、时间等）。
+支持长时间稳定运行（多刷新、多页面访问场景）。
+
+技术要求：使用 playwright-stealth 或手动注入 stealth 脚本（必须）。
+使用持久化 Context（storage_state.json），不需要登录。
+使用 OpenCV + 边缘检测自动计算滑块缺口距离。
+使用人类拖动轨迹（贝塞尔曲线 + 随机抖动 + 加速度 + 微小 y 轴偏移），不能直线拖动。
+加入随机延时、随机鼠标移动、随机滚动，模拟真人。
+浏览器设置：headless=False（调试时），真实 Chrome UA、中国时区、上海坐标。
+异常处理：验证失败自动点击“刷新”重试，最多重试 3 次。
+输出：打印当前状态（是否触发验证码、拖动距离、验证结果），最终提取新闻数据。
+
+验证码处理流程（必须严格实现）：等待滑块弹窗出现（文字“按住左边按钮拖动完成上方拼图”）。
+提取背景图（fullbg）和滑块图（slice）→ 转 base64。
+OpenCV 灰度 + Canny 边缘检测 + 模板匹配 → 计算缺口距离。
+找到滑块按钮，执行人类拖动轨迹。
+等待 1.5 秒验证结果，若仍显示验证码则点击刷新重试。
+
+可选优化（优先级高）：支持代理（中国住宅代理）。
+提取新闻列表的示例代码（至少提取标题和链接）。
+代码结构清晰，便于后续扩展。
+
+交付物：一份完整、可直接运行的 Python 脚本（单文件）。
+注释详细，包含所有 pip install 命令。
+说明如何运行、如何调试 selector。
+
+完整示例代码（直接发给你的 Agent 作为参考/起点）python
+
+# requirements.txt
+# playwright
+# playwright-stealth
+# opencv-python
+# numpy
+
+from playwright.sync_api import sync_playwright
+import cv2
+import numpy as np
+import time
+import random
+import base64
+import re
+import json
+from pathlib import Path
+
+def human_drag(page, start_x, start_y, distance):
+    page.mouse.move(start_x, start_y)
+    page.mouse.down()
+    steps = random.randint(28, 38)
+    for i in range(steps):
+        ratio = i / steps
+        offset = distance * (ratio ** 1.85) + random.uniform(-4.5, 4.5)
+        y_offset = random.uniform(-3, 3)
+        page.mouse.move(start_x + offset, start_y + y_offset, steps=1)
+        time.sleep(random.uniform(0.007, 0.023))
+    page.mouse.up()
+    time.sleep(random.uniform(0.6, 1.4))
+
+def detect_gap(bg_base64: str, piece_base64: str) -> int:
+    bg_data = base64.b64decode(re.sub('^data:image/[^;]+;base64,', '', bg_base64))
+    piece_data = base64.b64decode(re.sub('^data:image/[^;]+;base64,', '', piece_base64))
+    
+    bg = cv2.imdecode(np.frombuffer(bg_data, np.uint8), cv2.IMREAD_COLOR)
+    piece = cv2.imdecode(np.frombuffer(piece_data, np.uint8), cv2.IMREAD_COLOR)
+    
+    bg_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
+    piece_gray = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
+    
+    bg_edge = cv2.Canny(bg_gray, 100, 200)
+    piece_edge = cv2.Canny(piece_gray, 100, 200)
+    
+    result = cv2.matchTemplate(bg_edge, piece_edge, cv2.TM_CCOEFF_NORMED)
+    _, _, _, max_loc = cv2.minMaxLoc(result)
+    gap = max_loc[0] * 0.98   # 微调比例，根据实际图片调整
+    return int(gap)
+
+def solve_slider(page):
+    try:
+        page.wait_for_selector('text=按住左边按钮拖动完成上方拼图', timeout=6000)
+        print("🔒 检测到滑块验证码，开始自动处理...")
+    except:
+        return True  # 没有验证码
+
+    # === 提取图片（36氪常见 selector，根据实际弹出后 F12 微调）===
+    bg_selector = "img.basicImg, .geetest_canvas_fullbg img, canvas, img[src*='basic']"
+    piece_selector = "img.actionImg, .geetest_canvas_slice img, canvas, img[src*='slice']"
+    
+    bg_img = page.locator(bg_selector).first
+    piece_img = page.locator(piece_selector).first
+    
+    bg_base64 = bg_img.evaluate("el => el.src || el.toDataURL('image/png')")
+    piece_base64 = piece_img.evaluate("el => el.src || el.toDataURL('image/png')")
+    
+    distance = detect_gap(bg_base64, piece_base64)
+    print(f"📏 计算缺口距离: {distance}px")
+    
+    # 拖动滑块
+    slider_btn = page.locator('.geetest_slider_button, button[aria-label*="拖动"], [class*="slider"]')
+    box = slider_btn.bounding_box()
+    human_drag(page, box['x'] + 12, box['y'] + 12, distance)
+    
+    time.sleep(1.8)
+    if not page.locator('text=按住左边按钮拖动完成上方拼图').is_visible():
+        print("✅ 滑块验证通过！")
+        return True
+    else:
+        print("❌ 验证失败，点击刷新重试...")
+        page.locator('text=刷新').click()
+        time.sleep(1)
+        return False
+
+# ==================== 主程序 ====================
+with sync_playwright() as p:
+    browser = p.chromium.launch(
+        headless=False,
+        args=['--disable-blink-features=AutomationControlled', '--no-sandbox']
+    )
+    
+    # 持久化 Context（推荐）
+    state_path = Path("36kr_state.json")
+    if state_path.exists():
+        context = browser.new_context(storage_state=json.loads(state_path.read_text(encoding="utf-8")))
+    else:
+        context = browser.new_context(
+            viewport={"width": 1440, "height": 900},
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+            locale="zh-CN",
+            timezone_id="Asia/Shanghai"
+        )
+    
+    # Stealth 注入
+    page = context.new_page()
+    page.add_init_script("""
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3,4,5]});
+        Object.defineProperty(navigator, 'languages', {get: () => ['zh-CN', 'zh']});
+    """)
+    
+    page.goto("https://36kr.com/information/web_news/", wait_until="networkidle")
+    time.sleep(random.uniform(2.5, 4.5))
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        if solve_slider(page):
+            break
+        if attempt == max_retries - 1:
+            print("⚠️ 多次验证失败，请手动处理或检查网络")
+    
+    # ==================== 这里写你的爬取逻辑 ====================
+    print("🚀 开始提取新闻列表...")
+    news_list = page.locator('article, .news-item, [class*="article"]').all()
+    for news in news_list[:10]:  # 示例：提取前10条
+        title = news.locator('h2, h3, a').first.inner_text(timeout=2000).strip()
+        link = news.locator('a').first.get_attribute('href')
+        print(f"标题: {title}\n链接: {link}\n{'-'*60}")
+    
+    # 保存 state
+    context.storage_state(path=str(state_path))
+    
+    # 保持浏览器打开方便调试
+    input("按 Enter 关闭浏览器...")
+    browser.close()
+
+使用方法（发给 Agent 时一起说明）：安装依赖：pip install playwright playwright-stealth opencv-python numpy
+安装依赖： pip install playwright playwright-stealth opencv-python numpy
+playwright install chromium
+剧作家安装 Chromium
+3
+第一次运行后会生成 36kr_state.json，后续自动加载。
+运行时弹出验证码 → 脚本会自动处理；若 selector 不匹配，让 Agent 弹出验证码后 F12 找到图片和按钮的 CSS 选择器，替换代码中对应部分即可。
+

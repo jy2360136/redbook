@@ -1,0 +1,321 @@
+界面新闻的页面加载逻辑如下：
+初次进入的时候，直接读取https://www.jiemian.com/account/main/1.html
+
+请求网址
+https://www.jiemian.com/account/main/1.html
+请求方法
+GET
+状态代码
+200 OK
+远程地址
+127.0.0.1:7897
+引荐来源网址政策
+strict-origin-when-cross-origin
+
+响应标头
+HTTP/1.1 200 OK
+Date: Mon, 30 Mar 2026 02:32:06 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Server: nginx
+x-frame-options: SAMEORIGIN
+Cache-Control: private
+x-powered-by: ThinkPHP
+Content-Encoding: gzip
+strict-transport-security: max-age=86400; includeSubDomains; preload
+Vary: Accept-Encoding, X-Is-Fit-Ua
+X-Ser: i37222_c28455, i35074_c29542
+X-Cache: HIT from i35074_c29542(cloudsvr)
+Expires: Thu, 01 Aug 2018 09:12:36 GMT
+
+请求标头
+GET /account/main/1.html HTTP/1.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: zh-CN,zh;q=0.9
+Cache-Control: no-cache
+Connection: keep-alive
+Cookie: __utrace=c6bd463136cd295bbc6f09ccbe5029e3
+Host: www.jiemian.com
+Pragma: no-cache
+Referer: https://www.jiemian.com/special/lists/news_1.html
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+sec-ch-ua: "Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+
+得到的html里面，关键的信息在下面
+<div class="main-body">
+                            <ul class="lists">
+                                <li class="item">
+                                    <div class="cover">
+                                        <a href="https://www.jiemian.com/article/14180478.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/jiemian/original/20260329/177478434757811400_a420x240.jpg">
+
+                                                                                    </a>
+                                    </div>
+                                    <div class="title multi-line-overflow">
+                                        <a href="https://www.jiemian.com/article/14180478.html">“顶梁柱”抽身而去，中银基金“权益突破”路在何方？</a>
+                                    </div>
+                                    <div class="info">
+                                        天下财道 · 25分钟前                                    </div>
+                                </li><li class="item">
+                                    <div class="cover">
+                                        <a href="https://www.jiemian.com/article/14180105.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/101/original/20260330/177483446951979500_a420x240.png">
+
+                                                                                    </a>
+                                    </div>
+                                    <div class="title multi-line-overflow">
+                                        <a href="https://www.jiemian.com/article/14180105.html">“湛江富豪”交棒儿子一年，“童年罐头”欢乐家利润遭遇“滑铁卢”</a>
+                                    </div>
+                                    <div class="info">
+                                        野马财经 · 50分钟前                                    </div>
+                                </li><li class="item">
+                                    <div class="cover">
+                                        <a href="https://www.jiemian.com/article/14180143.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/101/original/20260330/17748339546707400_a420x240.png">
+
+                                                                                    </a>
+                                    </div>
+                                    <div class="title multi-line-overflow">
+                                        <a href="https://www.jiemian.com/article/14180143.html">车载通信赛道的国产供应商，沦为5G新秩序下的后进生？</a>
+                                    </div>
+                                    <div class="info">
+                                        创业最前线 · 55分钟前                                    </div>
+                                </li><li class="item">
+                                    <div class="cover">
+                                        <a href="https://www.jiemian.com/article/14180681.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/101/original/20260330/177483370248160100_a420x240.png">
+
+                                                                                    </a>
+                                    </div>
+                                    <div class="title multi-line-overflow">
+                                        <a href="https://www.jiemian.com/article/14180681.html">“抖音网红”参半，要上市了</a>
+                                    </div>
+                                    <div class="info">
+                                        定焦One · 1小时前                                    </div>
+                                </li><li class="item">
+                                    <div class="cover">
+                                        <a href="https://www.jiemian.com/article/14180141.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/101/original/20260330/177483306599683700_a420x240.jpg">
+
+                                                                                    </a>
+                                    </div>
+                                    <div class="title multi-line-overflow">
+                                        <a href="https://www.jiemian.com/article/14180141.html">华润银行更名背后：撕下“珠海”标签身份升级，业绩承压突围不易</a>
+                                    </div>
+                                    <div class="info">
+                                        子弹财经 · 1小时前                                    </div>
+                                </li><li class="item">
+                                    <div class="cover">
+                                        <a href="https://www.jiemian.com/article/14180591.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/101/original/20260330/177483226781060900_a420x240.jpg">
+
+                                                                                    </a>
+                                    </div>
+                                    <div class="title multi-line-overflow">
+                                        <a href="https://www.jiemian.com/article/14180591.html">鸭子大降价，周黑鸭乐开花</a>
+                                    </div>
+                                    <div class="info">
+                                        斑马消费 · 1小时前                                    </div>
+                                </li>                            </ul>
+                            <div class="other">
+                                <div class="other-big">
+                                    <a href="https://www.jiemian.com/article/14179984.html">
+                                        <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20231231/1703988307814_a394x340.jpg">
+                                        <span class="title multi-line-overflow">格局有变，OLED显示器去年暴涨92%，第一名“换将”</span>
+                                        <span class="info">视听圈 · 13小时前</span>
+
+                                                                            </a>
+                                </div>
+                                <div class="other-small">
+                                    <div class="item">
+                                        <a href="https://www.jiemian.com/article/14179440.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20221021/1666364215695_a300x168.jpg">
+                                            <span class="title multi-line-overflow">8558亿小米，撞上“平庸”的墙</span>
+                                                                                    </a>
+                                    </div>
+                                    <div class="item">
+                                        <a href="https://www.jiemian.com/article/14179982.html">
+                                            <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20240723/1721724779872_a300x168.jpg">
+                                            <span class="title multi-line-overflow">李荣浩之怒</span>
+                                                                                    </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="lists">
+                                <li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14179754.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20230119/1674131912884_a420x240.jpg">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14179754.html">知乎2025：勒紧裤腰带搞AI故事会</a>
+                                        </div>
+                                        <div class="info">
+                                            豹变 · 13小时前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14179596.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/20260329/177477069522720800_a420x240.jpg">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14179596.html">去年才火的三筒洗衣机，已经卷到八筒了</a>
+                                        </div>
+                                        <div class="info">
+                                            螺旋实验室 · 13小时前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14179267.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/jiemian/original/20260329/177475582078632700_a420x240.png">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14179267.html">新能源装机翻两倍利润贡献却大降，这家电力“小豪门”怎么了？</a>
+                                        </div>
+                                        <div class="info">
+                                            华夏能源网 · 22小时前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14179076.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20230209/1675930013829_a420x240.jpg">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14179076.html">飞书、钉钉开源CLI，Agent开放路径走向分岔</a>
+                                        </div>
+                                        <div class="info">
+                                            AI价值官 · 1天前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14178874.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/20260329/177472259445974000_a420x240.png">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14178874.html">新规落地、监管约谈，乐信迎来最严合规大考</a>
+                                        </div>
+                                        <div class="info">
+                                            子弹财经 · 1天前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14178882.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/20260329/177472401679555600_a420x240.jpg">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14178882.html">国城矿业举债并购实控人旗下资产，清华五道口金融博士参与重组浮盈240亿元</a>
+                                        </div>
+                                        <div class="info">
+                                            创业最前线 · 1天前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14178736.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20231011/1697016110061_a420x240.png">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14178736.html">2100多万留下王一博，乐华娱乐值得么？</a>
+                                        </div>
+                                        <div class="info">
+                                            雷达财经 · 1天前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14178859.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/20260328/177471009565963300_a420x240.jpg">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14178859.html">马伯庸最高分IP筹拍，揭开长剧复苏密码</a>
+                                        </div>
+                                        <div class="info">
+                                            镜像娱乐 · 1天前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14178709.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20230509/1683618416487_a420x240.jpg">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14178709.html">泡泡玛特还是缺点“价值共识”</a>
+                                        </div>
+                                        <div class="info">
+                                            玩世代 · 1天前                                        </div>
+                                    </li><li class="item">
+                                        <div class="cover">
+                                            <a href="https://www.jiemian.com/article/14177047.html">
+                                                <img class="scaleBig" src="https://img.jiemian.com/101/original/vcg/20220916/1663324570759_a420x240.jpg">
+                                                                                            </a>
+                                        </div>
+                                        <div class="title multi-line-overflow">
+                                            <a href="https://www.jiemian.com/article/14177047.html">快手需要再次证明自己</a>
+                                        </div>
+                                        <div class="info">
+                                            市值榜 · 1天前                                        </div>
+                                    </li>                            </ul>
+                        </div>
+
+也就是说关键的信息就在<li class="item">里面，标题在<div class="title multi-line-overflow">
+                                        <a href="https://www.jiemian.com/article/14180478.html">“顶梁柱”抽身而去，中银基金“权益突破”路在何方？</a>
+                                    </div>        发布时间在<div class="info">
+                                        天下财道 · 25分钟前                                    </div>可以看到发布时间是与第三方机构的名称混在一起的，因此需要先按照"·"符号进行split,取出后面一项，然后去除两边的空格，得到真正的发布时间published
+
+
+以上是初次进入的第一屏的首页新闻。然后作为用户来说，滚到最后会自动触发加载更多新闻，偶尔会需要点击按钮来加载更多新闻。
+但是实际上通过抓包发现，加载出的更多新闻是藏在一个js脚本里面的返回值的，具体如下，你可以试试能不能把这些额外的信息加载出来！不行的话就用playwright去模拟滚动，并且也需要与36氪一样，滚动一次就保留下测试用的截图以及当时的html，便于后续的分析，调试的结果全部存在一个文件夹里面
+请求网址
+https://papi.jiemian.com/page/api/officialAccount/get_index_lists?ckey=finance_config_index&page=2&callback=jQuery37105680926751153036_1774837925010&_=1774837925014
+请求方法
+GET
+状态代码
+200 OK
+远程地址
+127.0.0.1:7897
+引荐来源网址政策
+strict-origin-when-cross-origin
+
+响应标头
+HTTP/1.1 200 OK
+server: nginx
+date: Mon, 30 Mar 2026 02:37:49 GMT
+content-type: application/json; charset=utf-8
+transfer-encoding: chunked
+vary: Accept-Encoding
+set-cookie: PHPSESSID=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; secure; HttpOnly
+set-cookie: _jm_unique_id=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=.jiemian.com; secure
+set-cookie: yz=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; domain=.jiemian.com; HttpOnly
+set-cookie: _jm_ppt_id=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; domain=.jiemian.com; HttpOnly
+set-cookie: uid=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; domain=.jiemian.com; HttpOnly
+set-cookie: ywnc=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; domain=.jiemian.com; HttpOnly
+content-encoding: gzip
+strict-transport-security: max-age=86400; includeSubDomains; preload
+set-cookie: SERVERID=papi133; path=/; HttpOnly
+S-Cnection: close
+
+请求标头
+GET /page/api/officialAccount/get_index_lists?ckey=finance_config_index&page=2&callback=jQuery37105680926751153036_1774837925010&_=1774837925014 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: zh-CN,zh;q=0.9
+Cache-Control: no-cache
+Connection: keep-alive
+Cookie: __utrace=c6bd463136cd295bbc6f09ccbe5029e3; PHPSESSID=k5mu7227gduu4sg80k635jfd45; SERVERID=api63
+Host: papi.jiemian.com
+Pragma: no-cache
+Referer: https://www.jiemian.com/
+Sec-Fetch-Dest: script
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Site: same-site
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+sec-ch-ua: "Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"

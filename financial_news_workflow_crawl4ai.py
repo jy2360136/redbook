@@ -7,6 +7,8 @@
   1. 虎嗅网 (RSS)      2. 晚点 LatePost (Playwright)  3. 36 氪 (API)
   4. 钛媒体 (RSS)      5. 极客公园 (requests)         6. 界面新闻 (RSS)
   7. 澎湃新闻 (requests)
+
+附注：2晚点、5极客公园、7澎湃新闻，这三个新闻网站由于新闻质量过差，暂时放弃爬取！
 """
 
 import sys
@@ -23,6 +25,9 @@ import json
 import argparse
 import html
 import re
+import time
+import base64
+import hashlib
 from datetime import datetime, timedelta
 from typing import List, Dict
 from pathlib import Path
@@ -55,6 +60,23 @@ try:
 except ImportError:
     HAS_BS4 = False
     print("⚠️ beautifulsoup4 未安装，运行：pip install beautifulsoup4")
+
+try:
+    from playwright.sync_api import sync_playwright
+    from playwright_stealth import Stealth
+    HAS_STEALTH = True
+except ImportError:
+    HAS_STEALTH = False
+
+try:
+    import cv2
+    import numpy as np
+    HAS_CV = True
+except ImportError:
+    HAS_CV = False
+    print("⚠️ opencv-python/numpy 未安装，运行：pip install opencv-python numpy")
+
+import random
 
 
 # ==================== 配置 ====================
@@ -196,6 +218,242 @@ def batch_fetch_huxiu_times(news_list: List[Dict]) -> List[Dict]:
 
     return news_list
 
+
+# ==================== 36 氪辅助函数 ====================
+
+def parse_relative_time(time_str: str) -> timedelta:
+    """解析时间字符串，返回 timedelta"""
+    if not time_str:
+        return timedelta(days=999)
+    time_str = time_str.strip()
+    if time_str == '昨天':
+        return timedelta(days=1)
+    if time_str == '今天':
+        return timedelta(hours=0)
+    if time_str == '前天':
+        return timedelta(days=2)
+    if time_str in ('刚刚', '刚才', '几秒前'):
+        return timedelta(seconds=30)
+
+    # 【新增支持】处理"X 小时前"、"X 分钟前"等格式（界面新闻）
+    match = re.match(r'(\d+)\s*秒 (前)?', time_str)
+    if match:
+        return timedelta(seconds=int(match.group(1)))
+    match = re.match(r'(\d+)\s*分钟 (前)?', time_str)
+    if match:
+        return timedelta(minutes=int(match.group(1)))
+    match = re.match(r'(\d+)\s*小时 (前)?', time_str)
+    if match:
+        return timedelta(hours=int(match.group(1)))
+    match = re.match(r'(\d+)\s*天 (前)?', time_str)
+    if match:
+        return timedelta(days=int(match.group(1)))
+
+    # 原有逻辑（兼容其他格式）
+    match = re.match(r'(\d+)\s*秒', time_str)
+    if match:
+        return timedelta(seconds=int(match.group(1)))
+    match = re.match(r'(\d+)\s*分钟', time_str)
+    if match and ('前' in time_str or '内' in time_str):
+        return timedelta(minutes=int(match.group(1)))
+    match = re.match(r'(\d+)\s*小时', time_str)
+    if match and ('前' in time_str or '内' in time_str):
+        return timedelta(hours=int(match.group(1)))
+    match = re.match(r'(\d+)\s*天', time_str)
+    if match and ('前' in time_str or '内' in time_str):
+        return timedelta(days=int(match.group(1)))
+    now = datetime.now()
+    match = re.match(r'(\d{4})[-/](\d{1,2})[-/](\d{1,2})', time_str)
+    if match:
+        try:
+            year, month, day = int(match.group(1)), int(
+                match.group(2)), int(match.group(3))
+            article_date = datetime(year, month, day)
+            delta = now - article_date
+            return delta if delta.total_seconds() >= 0 else timedelta(seconds=0)
+        except ValueError:
+            pass
+    return timedelta(days=999)
+
+
+def should_continue_fetching(time_str: str, days: int) -> bool:
+    """根据发布时间判断是否应该继续抓取"""
+    time_delta = parse_relative_time(time_str)
+    # 【关键修复】只要在指定天数内就继续抓取
+    return time_delta.days < days
+
+
+def debug_captcha(page, tag="debug"):
+    """诊断验证码状态"""
+    try:
+        captcha_visible = page.evaluate("""() => {
+            const container = document.getElementById('captcha_container');
+            if (!container) return false;
+            const iframe = container.querySelector('iframe');
+            return !!(container && iframe && container.offsetParent !== null);
+        }""")
+        iframe_count = page.locator('iframe[src*="bytedance.com"]').count()
+        article_count = len(page.query_selector_all('.information-flow-item'))
+        if article_count == 0:
+            article_count = len(page.query_selector_all('a[href^="/p/"]'))
+        print(f"\n🔍 【诊断】{tag} - {datetime.now().strftime('%Y%m%d_%H%M%S')}")
+        print(f"   • #captcha_container 是否可见：{captcha_visible}")
+        print(f"   • 字节滑块 iframe 数量：{iframe_count}")
+        print(f"   • 当前新闻卡片数量：{article_count}")
+    except Exception as e:
+        print(f"  ⚠️  诊断失败：{e}")
+
+
+def solve_slider(page):
+    """处理滑块验证码"""
+    try:
+        page.wait_for_timeout(2000)
+        captcha_check = page.evaluate("""() => {
+            const container = document.getElementById('captcha_container');
+            if (!container) return false;
+            const iframe = container.querySelector('iframe');
+            return !!(container && iframe);
+        }""")
+        if captcha_check:
+            print("  🔒 检测到字节滑块验证码（iframe）...")
+            iframe = page.frame_locator('iframe[src*="bytedance.com"]')
+            slider_btn = None
+            selectors = ['div[class*="slide"]',
+                         'div[class*="dragger"]', 'div[class*="captcha"]']
+            for sel in selectors:
+                try:
+                    slider_btn = iframe.locator(sel).first
+                    if slider_btn.count() > 0:
+                        print(f"  ✅ 找到滑块按钮：{sel}")
+                        break
+                except:
+                    continue
+            if slider_btn:
+                try:
+                    refresh_btn = iframe.locator('text=刷新').first
+                    if refresh_btn.count() > 0:
+                        refresh_btn.click()
+                        print("  🔄 点击了刷新按钮")
+                        page.wait_for_timeout(3000)
+                except:
+                    pass
+            else:
+                print("  ⚠️  未找到背景图或滑块图")
+                try:
+                    refresh_btn = iframe.locator('text=刷新').first
+                    if refresh_btn.count() > 0:
+                        refresh_btn.click()
+                        print("  🔄 点击了刷新按钮")
+                        page.wait_for_timeout(3000)
+                except:
+                    pass
+    except Exception as e:
+        print(f"  ⚠️  验证码处理失败：{e}")
+
+
+def human_scroll(page, times=30, days: int = 3):
+    """
+    【最终强化】人类式滚动 + 精准点击"查看更多"按钮
+    使用 class="kr-loading-more-button show" + JS 原生点击双保险
+    """
+    prev_count = 0
+    no_new_count = 0
+    click_count = 0
+    max_clicks = 6
+
+    for i in range(times):
+        # 随机鼠标移动（模拟人类）
+        for _ in range(random.randint(3, 6)):
+            page.mouse.move(random.randint(100, 1400), random.randint(
+                100, 800), steps=random.randint(8, 15))
+            time.sleep(random.uniform(0.1, 0.4))
+
+        # 大段滚动
+        scroll_distance = random.randint(800, 1500)
+        page.evaluate(f"window.scrollBy(0, {scroll_distance})")
+        time.sleep(random.uniform(2.0, 5.0))
+
+        # 【最终强化】精准点击查看更多按钮
+        try:
+            more_btn = page.locator('.kr-loading-more-button.show').first
+            if more_btn.count() > 0 and click_count < max_clicks:
+                print(
+                    f"🔄 发现 .kr-loading-more-button.show 按钮，正在点击... (第{click_count+1}次)")
+
+                # 1. 滚动到按钮完全可见
+                more_btn.scroll_into_view_if_needed()
+                time.sleep(1.0)
+
+                # 2. 先尝试普通点击
+                try:
+                    more_btn.click()
+                    print("  → 使用 Playwright click()")
+                except:
+                    # 3. 失败则用 JS 原生点击（最强绕过反爬）
+                    page.evaluate("""() => {
+                        const btn = document.querySelector('.kr-loading-more-button.show');
+                        if (btn) btn.click();
+                    }""")
+                    print("  → 使用 JS 原生 click()")
+
+                click_count += 1
+
+                # 等待新内容加载
+                time.sleep(random.uniform(4.0, 7.0))
+                debug_captcha(page, f"点击查看更多后_第{i+1}次")
+
+                print(f"  ✅ 已成功点击 '查看更多' 第 {click_count} 次")
+        except Exception as e:
+            print(f"  ⚠️ 点击'查看更多'失败：{e}")
+
+        # 实时检查最后一条新闻时间
+        try:
+            last_time = page.evaluate('''() => {
+                const items = document.querySelectorAll('.information-flow-item');
+                if (items.length === 0) return null;
+                const lastItem = items[items.length - 1];
+                const timeEl = lastItem.querySelector('.kr-flow-bar-time');
+                return timeEl ? timeEl.textContent.trim() : null;
+            }''')
+            if last_time and not should_continue_fetching(last_time, days):
+                print(f"  ✅ 检测到最后一条新闻已超过 {days} 天（{last_time}），停止滚动")
+                break
+        except Exception as e:
+            print(f"  ⚠️ 时间检查失败：{e}")
+
+        # 验证码检查
+        if (i + 1) % 3 == 0:
+            solve_slider(page)
+
+        # 文章统计 + 卡住处理
+        try:
+            article_count = len(
+                page.query_selector_all('.information-flow-item'))
+            if article_count == 0:
+                article_count = len(page.query_selector_all('a[href*="/p/"]'))
+
+            if article_count > prev_count:
+                no_new_count = 0
+                prev_count = article_count
+                print(f"  第 {i+1} 次滚动完成，当前文章数：{article_count}")
+            else:
+                no_new_count += 1
+                if no_new_count >= 5:
+                    print("  连续无新内容，尝试刷新加载...")
+                    page.evaluate("window.scrollTo(0, 0)")
+                    time.sleep(2)
+                    page.evaluate(
+                        "window.scrollTo(0, document.body.scrollHeight)")
+                    time.sleep(3)
+                    no_new_count = 0
+        except:
+            pass
+
+        # 诊断（每 5 次）
+        if (i + 1) % 5 == 0:
+            debug_captcha(page, f"滚动第{i+1}次_后")
+
+
 # ==================== 各网站专用爬虫 ====================
 
 
@@ -303,94 +561,643 @@ class SourceLatePost:
 
 
 class Source36kr:
+    """36 氪 - Playwright 动态抓取（带时间智能停止）"""
+    name = "36 氪"
 
     @staticmethod
     def fetch(days: int = 3, filter_companies: bool = False) -> List[Dict]:
-        if not HAS_REQUESTS:
-            return []
+        """
+        使用 Playwright 抓取 36 氪新闻，根据时间动态判断是否继续
+
+        Args:
+            days: 获取最近几天的文章
+            filter_companies: 是否过滤公司名
+
+        Returns:
+            文章列表
+        """
         news_list = []
-        try:
-            resp = requests.get(
-                "https://36kr.com/api/newsflash",
-                headers=HEADERS,
-                params={"page": 1, "page_size": 50},
-                timeout=15
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                items = data.get("data", {}).get("items", [])
-                for item in items:
-                    title = item.get("title", "")
-                    # 可选的公司名过滤
-                    if filter_companies and not filter_by_companies(title):
-                        continue
-                    news_list.append({
-                        "source": "36 氪",
-                        "title": title,
-                        "link": f"https://36kr.com/newsflashes/{item.get('id', '')}",
-                        "summary": item.get("description", "")[:200],
-                        "published": str(item.get("published_at", "")),
-                    })
-        except Exception as e:
-            print(f"36 氪错误：{e}")
+        urls_seen = set()
+
+        def add_article(title, link, published, source_tag=""):
+            """添加文章到列表（自动去重和过滤）"""
+            if not title or not link:
+                return False
+            if link in urls_seen:
+                return False
+            if filter_companies and not filter_by_companies(title):
+                return False
+            if published and not should_continue_fetching(published, days):
+                return False
+            urls_seen.add(link)
+            news_list.append({
+                "source": "36 氪",
+                "title": title.strip(),
+                "link": link,
+                "published": published or "",
+            })
+            return True
+
+        # ========== Playwright 抓取 ==========
+        if HAS_PLAYWRIGHT:
+            pw_count = Source36kr._fetch_playwright(days, add_article)
+            print(f"  Playwright: {pw_count}篇新增")
+        else:
+            print("  Playwright 未安装，跳过")
+
+        print(f"  36 氪最终抓取 {len(news_list)} 条（已去重）")
         return news_list
+
+    @staticmethod
+    def _fetch_playwright(days: int, add_article) -> int:
+        """
+        Playwright 抓取（带完整诊断 + 人类滚动 + 时间智能停止）
+
+        Args:
+            days: 获取最近几天的文章
+            add_article: 添加文章的函数
+
+        Returns:
+            抓取的文章数量
+        """
+        count = 0
+
+        if not HAS_PLAYWRIGHT:
+            print("  ⚠️  Playwright 未安装，跳过")
+            return count
+
+        if not HAS_CV:
+            print("  ⚠️  OpenCV 未安装，滑块验证可能失败")
+
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(
+                    headless=False,
+                    args=[
+                        '--disable-blink-features=AutomationControlled',
+                        '--no-sandbox',
+                        '--disable-web-security',
+                        '--disable-features=IsolateOrigins,site-per-process',
+                        '--disable-site-isolation-trials',
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu',
+                        '--window-size=1440,900',
+                    ]
+                )
+
+                state_path = Path("36kr_state.json")
+                if state_path.exists():
+                    try:
+                        context = browser.new_context(
+                            storage_state=json.loads(
+                                state_path.read_text(encoding="utf-8"))
+                        )
+                        print("  📦 加载持久化状态")
+                    except:
+                        context = browser.new_context()
+                else:
+                    context = browser.new_context(
+                        viewport={"width": 1440, "height": 900},
+                        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+                        locale="zh-CN",
+                        timezone_id="Asia/Shanghai"
+                    )
+
+                if HAS_STEALTH:
+                    Stealth().apply_stealth_sync(context)
+
+                page = context.new_page()
+                page.add_init_script("""
+                    Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                    Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+                    Object.defineProperty(navigator, 'languages', {get: () => ['zh-CN', 'zh', 'en']});
+                    window.chrome = { runtime: {} };
+                """)
+
+                print("  📡 [Playwright] 访问 36 氪新闻页...")
+                page.goto("https://36kr.com/information/web_news/",
+                          wait_until="networkidle")
+                time.sleep(random.uniform(2.5, 4.5))
+
+                debug_captcha(page, "初始加载")
+                solve_slider(page)
+
+                print(f"  开始滚动加载（目标{days}天内，自动停止）...")
+                human_scroll(page, times=30, days=days)
+
+                articles_data = page.evaluate('''() => {
+                    const result = [];
+                    const items = document.querySelectorAll('.information-flow-item');
+                    items.forEach(item => {
+                        let title = item.querySelector('.article-item-title, .title-wrapper a') ?
+                                    item.querySelector('.article-item-title, .title-wrapper a').textContent.trim() : '';
+                        let linkEl = item.querySelector('a[href^="/p/"]');
+                        let link = linkEl ? linkEl.getAttribute('href') : '';
+
+                        // 【关键修复】精准提取发布时间
+                        let publishTime = '';
+                        const timeEl = item.querySelector('.kr-flow-bar-time');
+                        if (timeEl) {
+                            publishTime = timeEl.textContent.trim();
+                        }
+
+                        if (title.length > 5 && link) {
+                            result.push({
+                                title: title,
+                                link: link.startsWith('http') ? link : 'https://36kr.com' + link,
+                                publishTime: publishTime
+                            });
+                        }
+                    });
+                    // 去重
+                    const seen = new Set();
+                    return result.filter(i => {
+                        if (seen.has(i.link)) return false;
+                        seen.add(i.link);
+                        return true;
+                    });
+                }''')
+
+                try:
+                    context.storage_state(path=str(state_path))
+                except:
+                    pass
+
+                browser.close()
+
+                filtered_count = 0
+                for article in articles_data:
+                    publish_time = article.get('publishTime', '')
+                    if add_article(article['title'], article['link'], publish_time):
+                        count += 1
+                        filtered_count += 1
+
+                print(
+                    f"  ✅ [Playwright] 提取 {len(articles_data)} 篇，新增 {filtered_count} 篇（时间过滤：{len(articles_data) - filtered_count} 篇）")
+
+        except Exception as e:
+            print(f"  ❌ [Playwright] 错误：{e}")
+            import traceback
+            traceback.print_exc()
+
+        return count
 
 
 class SourceTmtpost:
-    """钛媒体 - RSS"""
+    """钛媒体 - API + Playwright 混合抓取（过滤视频新闻）"""
     name = "钛媒体"
 
     @staticmethod
     def fetch(days: int = 3, filter_companies: bool = False) -> List[Dict]:
-        if not HAS_FEEDPARSER:
+        """
+        使用 API + Playwright 混合方式抓取钛媒体新闻，过滤视频内容
+        优先使用 API 方式（更高效），失败时回退到 Playwright
+        """
+        # 优先尝试 API 方式
+        news_list = SourceTmtpost._fetch_by_api(days, filter_companies)
+
+        if news_list:
+            return news_list
+
+        # API 失败时使用 Playwright
+        print("  ⚠️ API 方式失败，切换到 Playwright 方式...")
+        return SourceTmtpost._fetch_by_playwright(days, filter_companies)
+
+    @staticmethod
+    def _fetch_by_api(days: int, filter_companies: bool) -> List[Dict]:
+        """通过 API 接口获取钛媒体新闻"""
+        if not HAS_REQUESTS:
             return []
+
+        print("  📡 [API] 正在通过 API 获取钛媒体新闻...")
+
+        api_url = "https://api.tmtpost.com/v1/lists/new"
+        all_news = []
+        urls_seen = set()
+        offset = 0
+        limit = 20
+        max_pages = 30  # 最多获取 30 页（约 600 条）
+
+        # API 参数（基于抓包结果）
+        params_template = {
+            "limit": str(limit),
+            "offset": str(offset),
+            "subtype": "post;atlas;video_article;fm_audios;",
+        }
+
+        for page in range(max_pages):
+            params = params_template.copy()
+            params["offset"] = str(offset)
+
+            try:
+                # 生成完整的请求头（基于抓包结果）
+                timestamp = int(time.time() * 1000)
+                token = base64.b64encode(
+                    str(timestamp // 1000).encode()).decode()
+                auth_str = f"{timestamp // 1000}|F3x47g39Wc4M96nwA28T"
+                signature = hashlib.md5(auth_str.encode()).hexdigest()
+
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                    "Accept": "application/json, text/plain, */*",
+                    "Accept-Language": "zh-CN,zh;q=0.9",
+                    "app-key": "2015042403",
+                    "app-secret": "F3x47g39Wc4M96nwA28T",
+                    "app-version": "web1.0",
+                    "device": "pc",
+                    "timestamp": str(timestamp),
+                    "token": token,
+                    "authorization": f'"{timestamp // 1000}|{signature}"',
+                    "referer": "https://www.tmtpost.com/",
+                    "origin": "https://www.tmtpost.com",
+                }
+
+                response = requests.get(
+                    api_url, headers=headers, params=params, timeout=15)
+
+                if response.status_code != 200:
+                    print(f"  ❌ API 请求失败：{response.status_code}")
+                    break
+
+                result = response.json()
+
+                if result.get("result") != "ok":
+                    print(f"  ❌ API 返回失败")
+                    break
+
+                data = result.get("data", [])
+
+                if not data:
+                    break
+
+                # 解析数据
+                new_count = 0
+                for item in data:
+                    item_type = item.get("item_type", "")
+
+                    # 【关键过滤】只保留 post 类型（文字新闻）
+                    if item_type != "post":
+                        continue
+
+                    title = item.get("title", "")
+                    summary = item.get("summary", "")
+                    short_url = item.get("short_url", "")
+                    time_published = item.get("time_published", "")
+                    human_time = item.get("human_time_published", "")
+
+                    # 转换为可读时间
+                    publish_time = human_time
+                    if time_published:
+                        try:
+                            ts = int(time_published)
+                            publish_time = datetime.fromtimestamp(
+                                ts).strftime("%Y-%m-%d %H:%M:%S")
+                        except:
+                            pass
+
+                    # 去重
+                    if short_url in urls_seen:
+                        continue
+
+                    urls_seen.add(short_url)
+
+                    # 【需求】合并 title 和 summary 作为标题
+                    final_title = f"{title}——{summary}" if summary else title
+
+                    # 公司名过滤
+                    if filter_companies and not filter_by_companies(final_title):
+                        continue
+
+                    all_news.append({
+                        "source": "钛媒体",
+                        "title": final_title,
+                        "link": short_url,
+                        "published": publish_time,
+                    })
+
+                    new_count += 1
+
+                print(
+                    f"  第{page+1}页：获取 {len(data)} 条，新增 {new_count} 条，总计 {len(all_news)} 条")
+
+                if len(data) < limit:
+                    break
+
+                offset += limit
+
+            except Exception as e:
+                print(f"  ❌ API 错误：{e}")
+                break
+
+        print(f"  ✅ API 方式共获取 {len(all_news)} 条")
+        return all_news
+
+    @staticmethod
+    def _fetch_by_playwright(days: int, filter_companies: bool) -> List[Dict]:
+        """使用 Playwright 浏览器方式获取（备用方案）"""
+        if not HAS_PLAYWRIGHT:
+            return []
+
         news_list = []
+        urls_seen = set()
+
         try:
-            feed = feedparser.parse("https://www.tmtpost.com/rss.xml")
-            for entry in feed.entries[:50]:
-                title = entry.get("title", "")
-                # 可选的公司名过滤
-                if filter_companies and not filter_by_companies(title):
-                    continue
-                news_list.append({
-                    "source": "钛媒体",
-                    "title": title,
-                    "link": entry.get("link", ""),
-                    "summary": entry.get("summary", "")[:200],
-                    "published": entry.get("published", ""),
-                })
+            with sync_playwright() as p:
+                browser = p.chromium.launch(
+                    headless=False,
+                    args=['--disable-blink-features=AutomationControlled',
+                          '--no-sandbox']
+                )
+
+                context = browser.new_context(
+                    viewport={"width": 1440, "height": 900},
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                )
+
+                if HAS_STEALTH:
+                    Stealth().apply_stealth_sync(context)
+
+                page = context.new_page()
+                page.add_init_script("""
+                    Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                    window.chrome = { runtime: {} };
+                """)
+
+                print("  📡 [Playwright] 访问钛媒体新闻页...")
+                page.goto("https://www.tmtpost.com/new",
+                          wait_until="networkidle", timeout=60000)
+                time.sleep(random.uniform(2.5, 4.5))
+
+                # 滚动加载
+                print("  开始滚动加载...")
+                prev_count = 0
+                no_new_count = 0
+
+                for i in range(20):
+                    page.mouse.move(random.randint(100, 1400),
+                                    random.randint(100, 800))
+                    page.evaluate(
+                        f"window.scrollBy(0, {random.randint(800, 1500)})")
+                    time.sleep(random.uniform(2.0, 4.0))
+
+                    try:
+                        article_count = len(
+                            page.query_selector_all('.type-post'))
+                        if article_count > prev_count:
+                            no_new_count = 0
+                            prev_count = article_count
+                        else:
+                            no_new_count += 1
+                            if no_new_count >= 3:
+                                break
+                    except:
+                        pass
+
+                # 提取文章数据
+                articles_data = page.evaluate('''() => {
+                    const result = [];
+                    const items = document.querySelectorAll('.type-post');
+                    items.forEach(item => {
+                        const titleEl = item.querySelector('._tit');
+                        const title = titleEl ? titleEl.textContent.trim() : '';
+                        
+                        const linkEl = item.querySelector('._tit');
+                        let link = linkEl ? linkEl.getAttribute('href') : '';
+                        if (link && !link.startsWith('http')) {
+                            link = 'https://www.tmtpost.com' + link;
+                        }
+                        
+                        const timeEl = item.querySelector('._time.newTime');
+                        let publishTime = '';
+                        if (timeEl) {
+                            publishTime = timeEl.textContent.trim().replace('· ', '');
+                        }
+                        
+                        // 只保留文字新闻（链接不包含/video/）
+                        if (title.length > 5 && link && !link.includes('/video/')) {
+                            result.push({
+                                title: title,
+                                link: link,
+                                publishTime: publishTime
+                            });
+                        }
+                    });
+                    return result;
+                }''')
+
+                browser.close()
+
+                # 去重并添加到列表
+                for article in articles_data:
+                    link = article['link']
+                    if link not in urls_seen:
+                        urls_seen.add(link)
+
+                        # 【需求】只有 title，没有 summary，所以直接用 title
+                        final_title = article['title']
+
+                        # 公司名过滤
+                        if filter_companies and not filter_by_companies(final_title):
+                            continue
+
+                        news_list.append({
+                            "source": "钛媒体",
+                            "title": final_title,
+                            "link": link,
+                            "published": article.get('publishTime', ''),
+                        })
+
+                print(f"  ✅ Playwright 方式共获取 {len(news_list)} 条")
+
         except Exception as e:
-            print(f"钛媒体错误：{e}")
+            print(f"  ❌ [Playwright] 错误：{e}")
+
         return news_list
 
 
 class SourceJiemian:
-    """界面新闻 - RSS"""
+    """界面新闻 - API + Playwright 混合抓取"""
     name = "界面新闻"
 
     @staticmethod
     def fetch(days: int = 3, filter_companies: bool = False) -> List[Dict]:
-        if not HAS_FEEDPARSER:
-            return []
+        """
+        使用 API + Playwright 抓取界面新闻
+
+        Args:
+            days: 获取最近几天的文章
+            filter_companies: 是否过滤公司名
+
+        Returns:
+            文章列表
+        """
         news_list = []
-        try:
-            feed = feedparser.parse(
-                "https://a.jiemian.com/index.php?m=article&a=rss")
-            for entry in feed.entries[:50]:
-                title = entry.get("title", "")
-                # 可选的公司名过滤
-                if filter_companies and not filter_by_companies(title):
-                    continue
-                news_list.append({
-                    "source": "界面新闻",
-                    "title": title,
-                    "link": entry.get("link", ""),
-                    "summary": entry.get("summary", "")[:200],
-                    "published": entry.get("published", ""),
-                })
-        except Exception as e:
-            print(f"界面新闻错误：{e}")
+        urls_seen = set()
+
+        def add_article(title, link, published):
+            """添加文章到列表（自动去重和过滤）"""
+            if not title or not link:
+                print(f"    ❌ 跳过：标题或链接为空")
+                return False
+            if link in urls_seen:
+                print(f"    ❌ 跳过：重复链接 {link[:50]}")
+                return False
+            if filter_companies and not filter_by_companies(title):
+                print(f"    ❌ 跳过：公司名过滤 {title[:30]}")
+                return False
+            if published and not should_continue_fetching(published.split(' · ')[-1] if ' · ' in published else published, days):
+                print(f"    ❌ 跳过：时间超出范围 {published}")
+                return False
+            urls_seen.add(link)
+            news_list.append({
+                "source": "界面新闻",
+                "title": title.strip(),
+                "link": link,
+                "published": published or "",
+            })
+            print(f"    ✅ 添加：{title[:30]}")
+            return True
+
+        # ========== API 抓取（优先）==========
+        if HAS_REQUESTS:
+            api_count = SourceJiemian._fetch_by_api(days, add_article)
+            print(f"  API: {api_count}篇新增")
+        else:
+            print("  requests 未安装，跳过 API 抓取")
+
+        print(f"  界面新闻最终抓取 {len(news_list)} 条（已去重）")
         return news_list
+
+    @staticmethod
+    def _fetch_by_api(days: int, add_article) -> int:
+        """
+        通过 API 接口获取界面新闻
+
+        Args:
+            days: 获取最近几天的文章
+            add_article: 添加文章的函数
+
+        Returns:
+            抓取的文章数量
+        """
+        count = 0
+
+        if not HAS_REQUESTS:
+            print("  ⚠️  requests 未安装，跳过")
+            return count
+
+        try:
+            print("  📡 [API] 正在通过 API 获取界面新闻...")
+
+            api_url = "https://papi.jiemian.com/page/api/officialAccount/get_index_lists"
+            params = {
+                "ckey": "finance_config_index",
+                "page": 1
+            }
+
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                "Accept": "*/*",
+                "Accept-Language": "zh-CN,zh;q=0.9",
+                "Referer": "https://www.jiemian.com/",
+            }
+
+            all_articles = []
+            max_pages = 20  # 最多获取 20 页（每页 10 条，共 200 条）
+
+            for page_num in range(1, max_pages + 1):
+                params["page"] = page_num
+
+                try:
+                    response = requests.get(
+                        api_url, headers=headers, params=params, timeout=10)
+
+                    if response.status_code != 200:
+                        print(f"  ❌ API 请求失败：{response.status_code}")
+                        break
+
+                    # 【关键修复】处理 JSONP 格式：jsonpReturn({...});
+                    content = response.text.strip()
+
+                    # 去除 JSONP 包装，提取 JSON 部分
+                    # 格式：jsonpReturn({...});
+                    if content.startswith('jsonpReturn(') and content.endswith('});'):
+                        json_str = content[12:-2]  # 去掉 'jsonpReturn(' 和 '});'
+                    else:
+                        json_str = content
+
+                    result = json.loads(json_str)
+
+                    # 检查返回数据
+                    if result.get("code") != 0:
+                        print(
+                            f"  ❌ API 返回错误：{result.get('message', 'unknown error')}")
+                        break
+
+                    articles = result.get("result", [])
+                    if not articles:
+                        print(f"  ⏹️ 第{page_num}页没有数据了，停止")
+                        break
+
+                    print(f"  📄 第{page_num}页：{len(articles)}条")
+
+                    # 解析文章
+                    for article in articles:
+                        title = article.get("title", "")
+                        aid = article.get("id", "")
+                        source_name = article.get("source_name", "")
+                        publish_time = article.get("publish_time_format", "")
+
+                        if not title or not aid:
+                            continue
+
+                        link = f"https://www.jiemian.com/article/{aid}.html"
+                        published = f"{source_name} · {publish_time}" if source_name and publish_time else ""
+
+                        # 【关键修复】提取纯时间部分用于解析（去掉来源）
+                        time_for_parse = publish_time
+                        if ' · ' in publish_time:
+                            time_for_parse = publish_time.split(
+                                ' · ')[-1]  # 取"·"后面的部分
+
+                        # 【调试】输出时间解析结果
+                        if count < 3:  # 只显示前 3 条的调试信息
+                            print(f"  🔍 文章：{title[:30]}... | 发布时间：{published}")
+                            print(f"     用于解析：{time_for_parse}")
+                            time_delta = parse_relative_time(time_for_parse)
+                            print(
+                                f"     解析结果：{time_delta.days}天{time_delta.seconds//3600}小时 | 是否继续：{should_continue_fetching(time_for_parse, days)}")
+
+                        if add_article(title, link, published):
+                            count += 1
+
+                    # 如果没有更多数据，停止（每页固定 10 条）
+                    if len(articles) < 10:
+                        print(f"  ⏹️ 第{page_num}页只有{len(articles)}条，已到末尾")
+                        break
+
+                    # 短暂延迟，避免触发反爬
+                    time.sleep(random.uniform(0.3, 0.8))
+
+                except json.JSONDecodeError as e:
+                    print(f"  ❌ JSON 解析错误：{e}")
+                    print(f"  原始内容：{content[:200]}")
+                    break
+                except requests.exceptions.RequestException as e:
+                    print(f"  ❌ 网络错误：{e}")
+                    break
+                except Exception as e:
+                    print(f"  ❌ 解析错误：{e}")
+                    break
+
+            print(f"  ✅ API 抓取完成：{count}条")
+            return count
+
+        except Exception as e:
+            print(f"  ❌ 界面新闻 API 错误：{e}")
+            import traceback
+            traceback.print_exc()
+            return count
 
 
 class SourceGeekpark:
@@ -549,9 +1356,6 @@ def fetch_all(sources: List[str], days: int, filter_companies: bool = False) -> 
         "36kr": Source36kr,
         "tmtpost": SourceTmtpost,
         "jiemian": SourceJiemian,
-        "geekpark": SourceGeekpark,
-        "latepost": SourceLatepost,
-        "thepaper": SourceThepaper,
     }
     for src in sources:
         if src in source_map:
@@ -570,16 +1374,24 @@ def fetch_all(sources: List[str], days: int, filter_companies: bool = False) -> 
 
 
 def save_news(news_list: List[Dict], output_dir: str) -> str:
-    """保存新闻到 JSON"""
+    """保存新闻到 JSON（符合 jy.md 规范）"""
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    # 创建带时间戳的输出目录
-    output_path = Path(f"news_output_crawl4ai_{timestamp}")
+
+    # 【需求】按照 jy.md 规范：所有爬取结果放在 news_output/ 目录下
+    # 文件名规则：news_output_YYYYMMDD_HHmmSS.json
+    output_path = Path("news_output")
     output_path.mkdir(exist_ok=True)
-    filepath = output_path / f"news_result.json"
+
+    filename = f"news_output_{timestamp}.json"
+    filepath = output_path / filename
+
+    # 统计各来源数量
     by_source = {}
     for n in news_list:
         s = n.get("source", "未知")
         by_source[s] = by_source.get(s, 0) + 1
+
+    # 保存为 JSON
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump({
             "fetch_time": datetime.now().isoformat(),
@@ -587,6 +1399,7 @@ def save_news(news_list: List[Dict], output_dir: str) -> str:
             "by_source": by_source,
             "news": news_list,
         }, f, ensure_ascii=False, indent=2)
+
     return str(filepath)
 
 
@@ -601,13 +1414,12 @@ def main():
 
     # 默认来源
     if args.sources.lower() == "all":
-        sources = ["huxiu", "36kr", "tmtpost", "jiemian",
-                   "geekpark", "latepost", "thepaper"]
+        sources = ["huxiu", "36kr", "tmtpost", "jiemian"]
     else:
         sources = [s.strip() for s in args.sources.split(",")]
 
     print("=" * 50)
-    print("🚀 金融新闻自动化工作流 - 7 大权威媒体")
+    print("🚀 金融新闻自动化工作流 - 4 大权威媒体")
     print("=" * 50)
     print(f"来源：{', '.join(sources)}")
     print(f"天数：{args.days}")
