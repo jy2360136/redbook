@@ -1,22 +1,20 @@
 ---
 name: china-financial-news-writer
-description: 中国金融新闻自动写作系统，支持不同公司类型（科技巨头/新能源车企/消费品牌/金融券商）、新闻类型（财报分析/产品发布/行业动态/政策影响）、输出风格（小红书/公众号/研报简报）的组合生成。内置敏感词检测、关键词优化、互动触发设计。触发词："写金融新闻"、"财报分析文章"、"财经文章生成"、"公司新闻稿"、"投资分析写作"。
-version: 1.1.0
+description: 中国金融新闻自动写作系统，支持不同公司类型（科技巨头/新能源车企/消费品牌/金融券商）、新闻类型（财报分析/产品发布/行业动态/政策影响）的深度分析，专为 B站视频文案创作优化。内置深度情报搜集、万能分析框架。触发词："写金融新闻"、"财报分析文章"、"财经文章生成"、"公司新闻稿"、"投资分析写作"、"B站视频文案"。
+version: 2.0.0
 ---
 
 # 中国金融新闻自动写作系统 (China Financial News Writer)
 
-专业级金融新闻自动生成系统，根据公司类型、新闻类型、输出风格智能匹配写作框架，一键生成高质量金融内容。
+专业级金融新闻深度分析系统，专为 B站视频文案创作优化，支持深度情报搜集和万能分析框架。
 
 ## 核心特性
 
 - **万能分析框架**: 12大模块覆盖财经分析所有维度，适用于任何公司危机事件
-- **三维分类矩阵**: 公司类型 × 新闻类型 × 输出风格 = 定制化写作大纲
-- **深度情报搜集**: 全网 6 维调研（新闻/视频/社交/论坛/官方/数据）⭐ NEW
-- **智能模块选择**: 根据平台特性和时长要求，自动推荐最优内容组合
-- **敏感词合规**: 内置金融领域敏感词检测与替换
-- **关键词优化**: 自动布局核心词、长尾词、场景词
-- **互动触发设计**: 针对不同平台的互动机制设计
+- **三维分类矩阵**: 公司类型 × 新闻类型 = 定制化写作大纲
+- **深度情报搜集**: 全网 6 维调研（新闻/视频/社交/论坛/官方/数据）
+- **智能模块选择**: 根据视频时长要求，自动推荐最优内容组合
+- **B站视频优化**: 故事化叙事、数据可视化、互动设计
 - **数据驱动**: 支持财报数据、市场数据自动整合
 
 ---
@@ -43,12 +41,10 @@ version: 1.1.0
 
 ### 维度三：输出风格 (Output Styles)
 
-| 风格 | 字数 | 表格 | 图表 | 语气 | 目标读者 |
-|------|------|------|------|------|----------|
-| **小红书** | 500-800 | 0-1 | 3-5 | 亲切/emoji/口语化 | 个人投资者/理财小白 |
-| **公众号** | 1500-2500 | 1-3 | 5-8 | 专业但不失活泼 | 泛财经读者/投资爱好者 |
-| **研报简报** | 3000-5000 | 3-5 | 8-12 | 专业/客观/数据密集 | 专业投资者/机构客户 |
-| **深度报告** | 5000-8000 | 5-8 | 10-15 | 专业/深度/多维度 | 专业投资者/研究员 |
+| 风格 | 字数/时长 | 表格 | 图表 | 语气 | 目标读者 |
+|------|-----------|------|------|------|----------|
+| **B站视频文案** | 8-15分钟口播 | 3-5 | 5-10 | 故事化+专业解释 | B站观众/财经爱好者 |
+| **深度分析报告** | 5000-8000字 | 5-8 | 10-15 | 专业/深度/多维度 | 深度研究/视频脚本基础 |
 
 ---
 
@@ -60,11 +56,10 @@ version: 1.1.0
 
 **模块选择指南**:
 
-| 平台类型 | 推荐模块组合 | 时长分配 |
+| 视频时长 | 推荐模块组合 | 时长分配 |
 |---------|-------------|----------|
-| **B站视频** | 1,2,3 + 6,9,10,11 | 事件1min+分析3min+对比2min+技术2min+故事1min+互动1min |
-| **小红书** | 1,2,3 + 9,10 | 事件+分析+对比+故事+共鸣 |
-| **公众号** | 1,2,3,4,6,7 | 事件+分析+数据+技术+历史+展望 |
+| **8-10分钟** | 1,2,3 + 6,9,10,11 | 事件1min+分析3min+对比2min+技术2min+故事1min+互动1min |
+| **10-15分钟** | 1,2,3,4,6,7,9,10,11 | 完整分析+故事化叙事 |
 | **深度报告** | 全模块 | 按重要性权重分配 |
 
 详见 [references/universal_financial_analysis_framework.md](references/universal_financial_analysis_framework.md)
@@ -91,7 +86,7 @@ version: 1.1.0
 
 ---
 
-### Phase 1.5: 深度情报搜集 (Deep Intelligence Gathering) ⭐ NEW
+### Phase 1.5: 深度情报搜集 (Deep Intelligence Gathering)
 
 **目标**：像 ChatGPT 一样全网搜集信息，完整梳理事件的来龙去脉、历史渊源、深层原因
 
@@ -241,10 +236,7 @@ version: 1.1.0
 根据输出风格选择生成模板：
 
 详见：
-- [references/template-xiaohongshu.md](references/template-xiaohongshu.md)
-- [references/template-wechat.md](references/template-wechat.md)
-- [references/template-research.md](references/template-research.md)
-- [references/research-report-template.md](references/research-report-template.md) - 深度报告 ⭐ NEW
+- [references/research-report-template.md](references/research-report-template.md) - 深度分析报告模板
 
 ### Phase 4: 合规检查 (Compliance Check)
 
@@ -279,8 +271,8 @@ version: 1.1.0
    └── A/B 测试建议
 
 3. 互动触发设计
+   ├── 弹幕引导
    ├── 评论引导
-   ├── 分享动机
    └── 收藏价值
 ```
 
@@ -288,51 +280,22 @@ version: 1.1.0
 
 ## 输出规格 (Output Specification)
 
-### 小红书风格
+### B站视频文案风格
 
 ```markdown
-**标题**: [情绪词] + [核心结论] + [数字/悬念]
-**字数**: 500-800 字
+**时长**: 8-15分钟口播
+**字数**: 2000-4000字（按语速150字/分钟计算）
 **结构**:
-  - 开头：痛点/场景引入（50 字）
-  - 核心内容：3-5 个要点（300-500 字）
-  - 结尾：互动引导（50 字）
-**格式**: emoji 穿插、短段落、口语化
-**标签**: 5-10 个
+  - 开场钩子：痛点/悬念/数据冲击（30秒）
+  - 事件概述：核心新闻+背景（1-2分钟）
+  - 深度分析：3-5个维度（5-8分钟）
+  - 历史对比/案例故事（2-3分钟）
+  - 结尾互动：观点引导+下期预告（30秒）
+**格式**: 口语化表达、短句为主、数据可视化提示
+**互动**: 弹幕引导点、评论区话题
 ```
 
-### 公众号风格
-
-```markdown
-**标题**: [关键词] + [价值点] + [时效性]
-**字数**: 1500-2500 字
-**结构**:
-  - 导语：新闻概述（200 字）
-  - 核心分析：3-5 个维度（1000-1500 字）
-  - 投资建议/结论（300 字）
-  - 风险提示（100 字）
-**格式**: 专业但不失活泼、数据 + 观点
-**配图**: 5-8 张
-```
-
-### 研报简报风格
-
-```markdown
-**标题**: [公司名] + [事件] + [评级/观点]
-**字数**: 3000-5000 字
-**结构**:
-  - 投资要点（1 页）
-  - 事件概述（0.5 页）
-  - 详细分析（3-5 页）
-  - 财务预测（1 页）
-  - 估值与建议（1 页）
-  - 风险提示（0.5 页）
-**格式**: Times New Roman、专业客观
-**表格**: 3-5 个
-**图表**: 8-12 个
-```
-
-### 深度分析报告 ⭐ NEW
+### 深度分析报告风格
 
 ```markdown
 **标题**: [公司名][事件] 深度分析报告
@@ -360,39 +323,20 @@ version: 1.1.0
 
 ```
 用户输入:
-"帮我写一篇关于比亚迪 Q3 财报的小红书文章"
+"帮我分析比亚迪 Q3 财报，做一个 B站视频文案"
 
 系统自动识别:
 - 公司类型：新能源车企
 - 新闻类型：财报分析
-- 输出风格：小红书
+- 输出风格：B站视频文案
 
 输出:
-- 使用新能源车企 + 财报分析 + 小红书模板
-- 字数：600-800 字
-- 包含 emoji 和互动引导
+- 使用新能源车企 + 财报分析模板
+- 字数：2000-4000字（8-15分钟口播）
+- 包含弹幕引导和互动设计
 ```
 
-### 高级用法
-
-```
-用户输入:
-"写一篇公众号文章分析小鹏 MONA M03 发布，
-重点对比竞品，给出投资逻辑"
-
-系统自动识别:
-- 公司类型：新能源车企
-- 新闻类型：产品发布
-- 输出风格：公众号
-- 特殊要求：竞品对比 + 投资逻辑
-
-输出:
-- 使用产品发布 5 维度模型
-- 加强竞争格局分析（20%→30%）
-- 公众号格式，1500-2500 字
-```
-
-### 深度报告用法 ⭐ NEW
+### 深度报告用法
 
 ```
 用户输入:
@@ -432,9 +376,6 @@ version: 1.1.0
 ### 内容类型命名规则
 - **深度分析报告**: `output_YYYYMMDD_HHMMSS.md`
 - **B站口播稿**: `output_YYYYMMDD_HHMMSS_bilibili.md`
-- **小红书推文**: `output_YYYYMMDD_HHMMSS_xiaohongshu.md`
-- **公众号文章**: `output_YYYYMMDD_HHMMSS_wechat.md`
-- **研报简报**: `output_YYYYMMDD_HHMMSS_research.md`
 - **大纲/脚本**: `output_YYYYMMDD_HHMMSS_outline.md`
 
 ---
@@ -443,29 +384,23 @@ version: 1.1.0
 
 本技能整合自以下优秀技能的方法论：
 
-- **xiaohongshu-note-analyzer**: 关键词策略、标题公式、敏感词检测
 - **earnings-analysis**: 财报分析框架、Beat/Miss 分析
 - **stock-analysis**: 8 维度评估模型、时机预警
 - **copywriting**: 转化文案原则、CTA 设计
-- **social-media-analyzer**: 互动指标、平台基准
 
 ---
 
 ## 相关文件
 
 ### 参考资料
-- [references/universal_financial_analysis_framework.md](references/universal_financial_analysis_framework.md) - 万能财经分析框架 ⭐ NEW
-- [references/UNIVERSAL_FRAMEWORK_README.md](references/UNIVERSAL_FRAMEWORK_README.md) - 框架使用说明 ⭐ NEW
+- [references/universal_financial_analysis_framework.md](references/universal_financial_analysis_framework.md) - 万能财经分析框架
+- [references/UNIVERSAL_FRAMEWORK_README.md](references/UNIVERSAL_FRAMEWORK_README.md) - 框架使用说明
 - [references/data-collection.md](references/data-collection.md) - 数据采集指南
-- [references/deep-research.md](references/deep-research.md) - 深度情报搜集指南 ⭐ NEW
-- [references/research-report-template.md](references/research-report-template.md) - 深度分析报告模板 ⭐ NEW
-- [references/template-xiaohongshu.md](references/template-xiaohongshu.md) - 小红书模板库
-- [references/template-wechat.md](references/template-wechat.md) - 公众号模板库
-- [references/template-research.md](references/template-research.md) - 研报模板库
+- [references/deep-research.md](references/deep-research.md) - 深度情报搜集指南
+- [references/research-report-template.md](references/research-report-template.md) - 深度分析报告模板
 - [references/compliance-rules.md](references/compliance-rules.md) - 合规规则
 - [references/title-formulas.md](references/title-formulas.md) - 标题公式库
 - [references/keyword-strategy.md](references/keyword-strategy.md) - 关键词策略
-- [references/sensitive-words-finance.md](references/sensitive-words-finance.md) - 金融敏感词库
 - [references/company-profiles.md](references/company-profiles.md) - 公司画像库
 
 ### 子技能

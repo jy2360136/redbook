@@ -277,10 +277,14 @@ def parse_relative_time(time_str: str) -> timedelta:
 
 
 def should_continue_fetching(time_str: str, days: int) -> bool:
-    """根据发布时间判断是否应该继续抓取"""
+    """根据发布时间判断是否应该继续抓取
+
+    注意：使用 <= days，即 days 天内的文章都保留
+    例如 days=3 时，"3天前"的文章也会被保留
+    """
     time_delta = parse_relative_time(time_str)
-    # 【关键修复】只要在指定天数内就继续抓取
-    return time_delta.days < days
+    # 【修复】使用 <= 而不是 <，确保边界值（如"3天前"）也被包含
+    return time_delta.days <= days
 
 
 def debug_captcha(page, tag="debug"):
@@ -1058,7 +1062,15 @@ class SourceJiemian:
             print(f"    ✅ 添加：{title[:30]}")
             return True
 
-        # ========== API 抓取（优先）==========
+        # ========== 首页 HTML 抓取（优先，首页有最新文章）==========
+        html_count = 0
+        if HAS_REQUESTS and HAS_BS4:
+            html_count = SourceJiemian._fetch_by_html(days, add_article)
+            print(f"  首页HTML: {html_count}篇新增")
+        else:
+            print("  requests/beautifulsoup4 未安装，跳过首页 HTML 抓取")
+
+        # ========== API 抓取（补充更多文章）==========
         if HAS_REQUESTS:
             api_count = SourceJiemian._fetch_by_api(days, add_article)
             print(f"  API: {api_count}篇新增")
@@ -1067,6 +1079,144 @@ class SourceJiemian:
 
         print(f"  界面新闻最终抓取 {len(news_list)} 条（已去重）")
         return news_list
+
+    @staticmethod
+    def _fetch_by_html(days: int, add_article) -> int:
+        """
+        通过解析首页 HTML 获取界面新闻（补充 API 未返回的文章）
+
+        根据抓包分析，首页 HTML 包含：
+        - <li class="item"> 中的文章列表
+        - 标题在 <div class="title multi-line-overflow"><a> 中
+        - 时间在 <div class="info"> 中，格式为 "来源 · X天前"
+
+        Args:
+            days: 获取最近几天的文章
+            add_article: 添加文章的函数
+
+        Returns:
+            抓取的文章数量
+        """
+        count = 0
+
+        try:
+            print("  📄 [HTML] 正在解析首页 HTML...")
+
+            # 获取首页
+            html_url = "https://www.jiemian.com/account/main/1.html"
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "zh-CN,zh;q=0.9",
+                "Referer": "https://www.jiemian.com/",
+            }
+
+            response = requests.get(html_url, headers=headers, timeout=15)
+            if response.status_code != 200:
+                print(f"  ❌ 首页请求失败：{response.status_code}")
+                return count
+
+            # 使用 BeautifulSoup 解析
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # 解析 <li class="item"> 中的文章
+            items = soup.select('li.item')
+            print(f"  发现 {len(items)} 个文章条目")
+
+            for item in items:
+                try:
+                    # 提取标题和链接
+                    title_elem = item.select_one('div.title a')
+                    if not title_elem:
+                        continue
+
+                    title = title_elem.get_text(strip=True)
+                    link = title_elem.get('href', '')
+
+                    if not title or not link:
+                        continue
+
+                    # 提取发布时间和来源
+                    info_elem = item.select_one('div.info')
+                    published = ""
+                    if info_elem:
+                        info_text = info_elem.get_text(strip=True)
+                        # 格式: "来源 · X天前" 或 "来源 · X小时前"
+                        # 按第一个 "·" 分割
+                        if '·' in info_text:
+                            parts = info_text.split('·', 1)
+                            source_name = parts[0].strip()
+                            time_str = parts[1].strip() if len(parts) > 1 else ""
+                            published = f"{source_name} · {time_str}"
+                        else:
+                            published = info_text
+
+                    if add_article(title, link, published):
+                        count += 1
+
+                except Exception as e:
+                    continue
+
+            # 解析 <div class="other-big"> 中的大图文章
+            other_big = soup.select('div.other-big a')
+            for elem in other_big:
+                try:
+                    title_elem = elem.select_one('span.title')
+                    if not title_elem:
+                        continue
+
+                    title = title_elem.get_text(strip=True)
+                    link = elem.get('href', '')
+
+                    if not title or not link:
+                        continue
+
+                    # 提取时间
+                    info_elem = elem.select_one('span.info')
+                    published = ""
+                    if info_elem:
+                        info_text = info_elem.get_text(strip=True)
+                        if '·' in info_text:
+                            parts = info_text.split('·', 1)
+                            source_name = parts[0].strip()
+                            time_str = parts[1].strip() if len(parts) > 1 else ""
+                            published = f"{source_name} · {time_str}"
+                        else:
+                            published = info_text
+
+                    if add_article(title, link, published):
+                        count += 1
+
+                except Exception as e:
+                    continue
+
+            # 解析 <div class="other-small"> 中的小图文章
+            other_small = soup.select('div.other-small div.item a')
+            for elem in other_small:
+                try:
+                    title_elem = elem.select_one('span.title')
+                    if not title_elem:
+                        continue
+
+                    title = title_elem.get_text(strip=True)
+                    link = elem.get('href', '')
+
+                    if not title or not link:
+                        continue
+
+                    # 小图文章可能没有时间信息
+                    if add_article(title, link, ""):
+                        count += 1
+
+                except Exception as e:
+                    continue
+
+            print(f"  ✅ 首页 HTML 解析完成：{count}条新增")
+
+        except Exception as e:
+            print(f"  ❌ 首页 HTML 解析错误：{e}")
+
+        return count
 
     @staticmethod
     def _fetch_by_api(days: int, add_article) -> int:
@@ -1171,9 +1321,22 @@ class SourceJiemian:
                         if add_article(title, link, published):
                             count += 1
 
-                    # 如果没有更多数据，停止（每页固定 10 条）
-                    if len(articles) < 10:
-                        print(f"  ⏹️ 第{page_num}页只有{len(articles)}条，已到末尾")
+                    # 【修复】检查本页是否有文章在时间范围内
+                    # 如果本页所有文章都超出时间范围，则停止
+                    page_has_valid = False
+                    for article in articles:
+                        publish_time = article.get("publish_time_format", "")
+                        if should_continue_fetching(publish_time, days):
+                            page_has_valid = True
+                            break
+
+                    if not page_has_valid:
+                        print(f"  ⏹️ 第{page_num}页所有文章都超出{days}天范围，停止抓取")
+                        break
+
+                    # 如果没有更多数据，停止
+                    if len(articles) == 0:
+                        print(f"  ⏹️ 第{page_num}页没有数据了，停止")
                         break
 
                     # 短暂延迟，避免触发反爬
@@ -1374,15 +1537,22 @@ def fetch_all(sources: List[str], days: int, filter_companies: bool = False) -> 
 
 
 def save_news(news_list: List[Dict], output_dir: str) -> str:
-    """保存新闻到 JSON（符合 jy.md 规范）"""
+    """保存新闻到 JSON
+
+    Args:
+        news_list: 新闻列表
+        output_dir: 输出目录（由工作流指定，如 output/pipeline_output_xxx/crawl_news_result/）
+
+    Returns:
+        保存的文件路径
+    """
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    # 【需求】按照 jy.md 规范：所有爬取结果放在 news_output/ 目录下
-    # 文件名规则：news_output_YYYYMMDD_HHmmSS.json
-    output_path = Path("news_output")
-    output_path.mkdir(exist_ok=True)
+    # 使用传入的 output_dir，创建目录
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
 
-    filename = f"news_output_{timestamp}.json"
+    filename = f"news_raw.json"
     filepath = output_path / filename
 
     # 统计各来源数量
@@ -1407,10 +1577,17 @@ def main():
     parser = argparse.ArgumentParser(description="金融新闻自动化工作流 - 7 大权威媒体")
     parser.add_argument("--days", type=int, default=3, help="抓取近 X 天")
     parser.add_argument("--sources", type=str, default="all", help="来源，逗号分隔")
-    parser.add_argument("--output", type=str, default=".", help="输出目录")
+    parser.add_argument("--output", type=str, default=None, help="输出目录（默认自动创建 output/pipeline_output_时间戳/crawl_news_result/）")
     parser.add_argument("--filter-companies", action="store_true", default=False,
                         help="是否启用公司名过滤（默认关闭，抓取所有新闻）")
     args = parser.parse_args()
+
+    # 如果没有指定输出目录，自动创建工作流输出目录
+    if args.output is None:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        output_dir = Path("output") / f"pipeline_output_{timestamp}" / "crawl_news_result"
+    else:
+        output_dir = Path(args.output)
 
     # 默认来源
     if args.sources.lower() == "all":
@@ -1423,6 +1600,7 @@ def main():
     print("=" * 50)
     print(f"来源：{', '.join(sources)}")
     print(f"天数：{args.days}")
+    print(f"输出目录：{output_dir}")
     print(f"公司名过滤：{'✅ 开启' if args.filter_companies else '❌ 关闭'}")
 
     # 抓取
@@ -1446,8 +1624,11 @@ def main():
         print(f"  {i}. [{n['source']}] {n['title'][:40]}")
 
     # 保存
-    filepath = save_news(unique, args.output)
+    filepath = save_news(unique, str(output_dir))
     print(f"\n💾 已保存：{filepath}")
+
+    # 输出工作流状态提示
+    print(f"\n📋 下一步：运行选题分析，选择要制作的视频主题")
 
 
 if __name__ == "__main__":

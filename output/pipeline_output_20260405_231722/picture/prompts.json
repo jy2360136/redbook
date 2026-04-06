@@ -1,0 +1,98 @@
+{
+  "video_topic": "AI Agent时代：不是失业，而是人类开始为AI打工",
+  "total_images": 15,
+  "image_style": "科技感、商务风、信息图表风格",
+  "aspect_ratio": "16:9",
+  "prompts": [
+    {
+      "id": "img_001",
+      "scene": "封面图",
+      "chinese_prompt": "一个现代办公场景，一个年轻人坐在电脑前，屏幕上显示多个AI Agent窗口，窗口中有代码和数据流动，暗色调背景，蓝紫色渐变光效，科技感强，人物表情思考中，标题文字区域留白，16:9宽屏比例，赛博朋克风格",
+      "english_prompt": "A modern office scene, a young person sitting in front of a computer, multiple AI Agent windows visible on screen with flowing code and data, dark background with blue-purple gradient lighting, strong tech aesthetic, person has a contemplative expression, leave space for title text, 16:9 aspect ratio, cyberpunk style"
+    },
+    {
+      "id": "img_002",
+      "scene": "开场-角色反转",
+      "chinese_prompt": "一个人类站在中央，周围环绕着多个发光的AI机器人/Agent形象，人类正在指挥这些AI工作，AI在执行各种任务（写代码、处理数据、回答问题），对比强烈的光影效果，体现人类从执行者变成管理者的转变，商务科技风格，16:9",
+      "english_prompt": "A human figure standing at the center, surrounded by multiple glowing AI robots/agents, the human is directing these AIs to work, AIs are performing various tasks (coding, data processing, answering questions), strong contrast lighting effect, showing the transformation from executor to manager, business tech style, 16:9"
+    },
+    {
+      "id": "img_003",
+      "scene": "Agent vs 传统AI对比",
+      "chinese_prompt": "左右对比图，左边是传统对话式AI（一个人在问ChatGPT问题，AI在回答），右边是Agent时代（一个人说需求，Agent自主执行多个步骤完成任务），用箭头和图标展示差异，信息图表风格，干净简洁，蓝白配色，16:9",
+      "english_prompt": "A left-right comparison diagram, left side shows traditional conversational AI (a person asking ChatGPT questions, AI answering), right side shows Agent era (a person states requirements, Agent autonomously executes multiple steps to complete tasks), use arrows and icons to show the difference, infographic style, clean and simple, blue and white color scheme, 16:9"
+    },
+    {
+      "id": "img_004",
+      "scene": "价值链重写-软件行业",
+      "chinese_prompt": "展示软件行业价值链变化，上半部分是旧世界结构（甲方→乙方→开发团队，三个层级用不同颜色区分），下半部分是新世界结构（甲方→Agent+少量人才，层级压缩），用箭头表示压缩和简化，信息图表风格，16:9",
+      "english_prompt": "Showing the value chain transformation in software industry, top half shows old world structure (Client → Vendor → Dev Team, three tiers in different colors), bottom half shows new world structure (Client → Agent + Few Elite, compressed hierarchy), use arrows to indicate compression and simplification, infographic style, 16:9"
+    },
+    {
+      "id": "img_005",
+      "scene": "软件行业三层结构",
+      "chinese_prompt": "金字塔结构图，分三层：底层是执行层（红色，标注高危），中间是业务工程师层（橙色，标注被压缩），顶层是决策层（绿色，标注稀缺升值），每层标注典型岗位，金字塔右侧用图标展示AI对每层的冲击程度，16:9",
+      "english_prompt": "A pyramid structure diagram, three layers: bottom layer is execution layer (red, marked high risk), middle is business engineer layer (orange, marked compressed), top is decision maker layer (green, marked scarce and appreciating), each layer labeled with typical positions, right side of pyramid uses icons to show AI impact degree on each layer, 16:9"
+    },
+    {
+      "id": "img_006",
+      "scene": "三维判断模型",
+      "chinese_prompt": "三维坐标系图，三个轴分别是：可流程化（Process）、依赖外部环境（Interaction）、需要承担风险（Responsibility），空间中标注不同区域：红色区域标注一定会被AI接管，绿色区域标注人类不可替代，中间黄色区域是过渡带，3D立体效果，16:9",
+      "english_prompt": "A 3D coordinate system diagram, three axes are: Process (can be proceduralized), Interaction (depends on external environment), Responsibility (needs to bear risk), different zones marked in space: red zone marked will be taken over by AI, green zone marked humans irreplaceable, yellow transition zone in between, 3D effect, 16:9"
+    },
+    {
+      "id": "img_007",
+      "scene": "全行业冲击评估表",
+      "chinese_prompt": "热力图或矩阵表格，横轴是三个维度（可流程化、依赖环境、需担责），纵轴是不同行业，每个交叉点用颜色深浅表示风险等级，红色=极高危，橙色=高危，黄色=中危，绿色=低危，右侧标注典型岗位，信息图表风格，16:9",
+      "english_prompt": "A heatmap or matrix table, horizontal axis shows three dimensions (proceduralized, environment dependent, responsibility required), vertical axis shows different industries, each intersection uses color intensity to indicate risk level, red=extremely high risk, orange=high risk, yellow=medium risk, green=low risk, typical positions noted on the right, infographic style, 16:9"
+    },
+    {
+      "id": "img_008",
+      "scene": "管理异化-Token KPI",
+      "chinese_prompt": "讽刺风格插画，一个打工人被绑在椅子上，被迫疯狂敲键盘刷Token，屏幕上显示巨大的数字"2100亿Token"，旁边是老板在监督，背景是工厂流水线的感觉，暗色调，表现人的异化，漫画风格但带科技感，16:9",
+      "english_prompt": "Satirical style illustration, a worker tied to a chair, forced to frantically type to farm tokens, screen shows huge number '2100 Billion Tokens', boss supervising nearby, factory assembly line feeling in background, dark tone, expressing human alienation, manga style with tech aesthetic, 16:9"
+    },
+    {
+      "id": "img_009",
+      "scene": "Agent三阶段演进",
+      "chinese_prompt": "时间线图，三个阶段横向排列：阶段一（2024-2025）工具化，阶段二（2025-2026）流程接管，阶段三（2026-2028）组织重构，每个阶段用图标表示：工具化是人在用AI工具，流程接管是AI自主工作，组织重构是公司结构变化，箭头连接，信息图表风格，16:9",
+      "english_prompt": "A timeline diagram, three stages arranged horizontally: Stage 1 (2024-2025) Toolization, Stage 2 (2025-2026) Process Takeover, Stage 3 (2026-2028) Organization Restructuring, each stage uses icons: toolization shows person using AI tools, process takeover shows AI working autonomously, organization restructuring shows company structure change, connected by arrows, infographic style, 16:9"
+    },
+    {
+      "id": "img_010",
+      "scene": "人类角色转变",
+      "chinese_prompt": "左右对比图，左边是过去的人类（在操作电脑、写代码、画图），右边是未来的人类（在指挥多个AI、定义规则、做决策），中间用转变箭头连接，风格统一，简洁商务风，16:9",
+      "english_prompt": "Left-right comparison diagram, left side shows human in the past (operating computer, coding, drawing), right side shows human in the future (directing multiple AIs, defining rules, making decisions), connected by transformation arrow in the middle, unified style, clean business aesthetic, 16:9"
+    },
+    {
+      "id": "img_011",
+      "scene": "新职业-未来岗位",
+      "chinese_prompt": "三个未来职业形象并排站立，左边是AI训练师（在教AI任务），中间是Agent运营师（在管理AI团队），右边是AI伦理官（在监控AI行为），每个职业下方标注职责，未来科技感，蓝色调，16:9",
+      "english_prompt": "Three future professional figures standing side by side, left is AI Trainer (teaching AI tasks), middle is Agent Operator (managing AI team), right is AI Ethics Officer (monitoring AI behavior), each position has responsibilities noted below, futuristic tech aesthetic, blue tone, 16:9"
+    },
+    {
+      "id": "img_012",
+      "scene": "时间线预测2026-2031",
+      "chinese_prompt": "横向时间轴，从2026到2031年，每个年份节点标注关键变化：2026年Agent元年、2027-28年替代加速、2029-30年格局重塑、2031年后新平衡，用曲线表示就业影响程度，用不同颜色区分阶段，信息图表风格，16:9",
+      "english_prompt": "Horizontal timeline from 2026 to 2031, each year node marked with key changes: 2026 Agent Era begins, 2027-28 Replacement acceleration, 2029-30 Landscape reshaping, 2031+ New equilibrium, curve shows employment impact degree, different colors for different stages, infographic style, 16:9"
+    },
+    {
+      "id": "img_013",
+      "scene": "工业革命vs AI革命对比",
+      "chinese_prompt": "左右对比图，左边是工业革命时期（机器替代体力劳动，人类操作机器，工厂场景），右边是AI革命时期（AI替代脑力劳动，人类管理AI，现代办公场景），用对比的方式展示两次革命的相似与不同，历史与现代并置，16:9",
+      "english_prompt": "Left-right comparison diagram, left shows Industrial Revolution era (machines replacing physical labor, humans operating machines, factory scene), right shows AI Revolution era (AI replacing mental labor, humans managing AI, modern office scene), comparing similarities and differences between two revolutions, historical and modern juxtaposition, 16:9"
+    },
+    {
+      "id": "img_014",
+      "scene": "给普通人的建议",
+      "chinese_prompt": "一个人物站在岔路口，左边路标写着"❌ 执行流程、不学AI、重复工作"通向黑暗，右边路标写着"✅ 定义规则、承担责任、AI协作"通向光明，励志风格，明暗对比强烈，16:9",
+      "english_prompt": "A person standing at a fork in the road, left road sign reads '❌ Execute processes, Don't learn AI, Repetitive work' leading to darkness, right road sign reads '✅ Define rules, Take responsibility, AI collaboration' leading to light, inspirational style, strong light-dark contrast, 16:9"
+    },
+    {
+      "id": "img_015",
+      "scene": "结尾-重新定义工作",
+      "chinese_prompt": "一张充满希望的画面，人类和AI Agent和谐协作，人类在思考和决策，AI在执行，背景是未来城市天际线，日出光芒，象征新时代的开始，温暖色调，大标题文字区域留白，16:9",
+      "english_prompt": "A hopeful scene, humans and AI Agents working harmoniously together, humans thinking and making decisions, AI executing tasks, futuristic city skyline in background, sunrise glow, symbolizing the beginning of a new era, warm color tone, leave space for large title text, 16:9"
+    }
+  ]
+}
