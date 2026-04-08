@@ -81,7 +81,12 @@
       "Read(//c/Users/jy/.claude/skills/**)",
       "Bash(dir /b \"%USERPROFILE%\\\\.claude\\\\skills\")",
       "Bash(curl -s \"https://api.github.com/search/repositories?q=content-pipeline+skill+in:readme+in:name\")",
-      "Bash(curl -s \"https://api.github.com/search/repositories?q=frontend-slides+skill+in:readme+in:name\")"
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=frontend-slides+skill+in:readme+in:name\")",
+      "Bash(mkdir -p c:/Users/Administrator/Desktop/redbook/.agents/skills/video-agent-writer)",
+      "Bash(mkdir -p c:/Users/Administrator/Desktop/redbook/.agents/skills/humanizer-zh)",
+      "Bash(cp \"outline_AI_Agent_Job_Impact.md\" \"outline/v1_outline_AI_Agent_Job_Impact.md\")",
+      "Bash(cp \"script_AI_Agent_Job_Impact.md\" \"outline/v2_outline_AI_Agent_Job_Impact.md\")",
+      "Bash(cp \"referenceMD.md\" \"outline/v1_reference_AI_Agent_Job_Impact.md\")"
     ]
   }
 }

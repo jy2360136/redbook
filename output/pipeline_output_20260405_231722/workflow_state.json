@@ -1,1 +1,67 @@
-{"workflow_id": "pipeline_output_20260405_231722", "created_at": "2026-04-05T23:17:22", "current_step": 2, "completed_steps": [1], "step_status": {"step1": {"status": "completed", "completed_at": "2026-04-05T23:30:00", "output": "crawl_news_result/news_raw.json"}, "step2": {"status": "completed", "completed_at": "2026-04-06T00:30:00", "output": "manuscript/script_AI_Agent_Job_Impact.md", "topic": "AI Agent时代：不是失业，而是人类开始为AI打工", "word_count": 6500}, "step3": {"status": "pending"}, "step4": {"status": "pending"}, "step5": {"status": "pending"}, "step6": {"status": "pending"}}, "config": {"days": 3, "sources": "huxiu,36kr,tmtpost,jiemian", "video_style": "深度分析", "target_platform": "B站"}, "selected_topic": {"name": "AI Agent就业冲击", "category": "新热点", "keywords": ["AI", "Agent", "Claude Code", "就业", "程序员"], "reason": "AI话题频次332次过高，细分为Agent方向，结合用户选择"}}
+{
+  "workflow_id": "pipeline_output_20260405_231722",
+  "created_at": "2026-04-05T23:17:22",
+  "updated_at": "2026-04-08T15:00:00",
+  "current_step": 4,
+  "completed_steps": [1, 2, 3],
+  "step_status": {
+    "step1": {
+      "status": "completed",
+      "completed_at": "2026-04-05T23:30:00",
+      "output": "crawl_news_result/news_raw.json",
+      "description": "新闻爬取：虎嗅、36氪、钛媒体、界面新闻"
+    },
+    "step2": {
+      "status": "completed",
+      "completed_at": "2026-04-08T14:00:00",
+      "output": "manuscript/outline/ + manuscript/script/",
+      "description": "文案撰写：大纲+逐字稿",
+      "outline_files": ["manuscript/outline/v1_outline_AI_Agent_Job_Impact.md", "manuscript/outline/v2_outline_AI_Agent_Job_Impact.md"],
+      "script_files": ["manuscript/script/v1_script_AI_Agent_Job_Impact.md"],
+      "topic": "AI Agent时代：不是失业，而是人类开始为AI打工",
+      "word_count": 4500,
+      "target_duration": "25-30分钟"
+    },
+    "step3": {
+      "status": "completed",
+      "completed_at": "2026-04-08T15:00:00",
+      "output": "picture/prompts.json + picture/images/",
+      "description": "配图生成：12张配图全部生成完毕",
+      "image_count": 12
+    },
+    "step4": {
+      "status": "in_progress",
+      "started_at": "2026-04-08T15:00:00",
+      "output": "ascii_draft/layout_v1.txt",
+      "description": "布局设计：12页幻灯片分镜规划已生成，等待用户确认"
+    },
+    "step5": {
+      "status": "pending",
+      "description": "HTML幻灯片生成：调用frontend-slides技能"
+    },
+    "step6": {
+      "status": "pending",
+      "description": "视频导出：调用remotion技能生成Remotion项目"
+    }
+  },
+  "config": {
+    "days": 3,
+    "sources": "huxiu,36kr,tmtpost,jiemian",
+    "video_style": "深度分析",
+    "target_platform": "B站"
+  },
+  "selected_topic": {
+    "name": "AI Agent就业冲击",
+    "category": "新热点",
+    "keywords": ["AI", "Agent", "Claude Code", "就业", "程序员"],
+    "reason": "AI话题频次332次过高，细分为Agent方向，结合用户选择"
+  },
+  "file_structure": {
+    "outline_dir": "manuscript/outline/",
+    "script_dir": "manuscript/script/",
+    "picture_dir": "picture/",
+    "images_dir": "picture/images/",
+    "naming_convention": "v{N}_{type}_{topic}.md",
+    "note": "v1/v2递增表示迭代版本，outline/存大纲，script/存逐字稿"
+  }
+}
