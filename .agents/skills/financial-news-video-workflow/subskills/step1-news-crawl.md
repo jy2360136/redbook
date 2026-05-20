@@ -1,4 +1,4 @@
-# Step 1: 新闻爬取与选题分析
+﻿# Step 1: 新闻爬取与选题分析
 
 ## 执行流程
 
@@ -7,7 +7,7 @@
 ```bash
 # 创建带时间戳的工作流目录
 timestamp=$(date +%Y%m%d_%H%M%S)
-mkdir -p output/pipeline_output_${timestamp}/{crawl_news_result,manuscript,picture/images,ascii_draft,html/assets,video/project}
+mkdir -p output/pipeline_output_${timestamp}/{crawl_news_result,manuscript,picture/images,ascii_draft,html,video/project}
 
 # 创建状态文件
 cat > output/pipeline_output_${timestamp}/workflow_state.json << EOF

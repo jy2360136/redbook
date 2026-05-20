@@ -1,3 +1,5 @@
+﻿> 说明（2026-05）：本文件是历史迭代记录，保留了旧脚本名称与旧命令。
+> 当前可运行入口请以 `docs/RUN.md` 与 `.agents/skills/financial-news-video-workflow/` 为准。
 # 更新日志
 
 ## [v2.3.0] - 2026-03-30
@@ -695,3 +697,4 @@ python crawl_36kr_realtime.py --days 1
 - 实现了 RSS 和 API 源的抓取
 - 支持日期过滤和公司名过滤
 - 生成小红书风格的分析提示词
+

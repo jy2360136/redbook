@@ -1,4 +1,4 @@
-# Step 6: 视频导出
+﻿# Step 6: 视频导出
 
 ## 执行流程
 
@@ -77,7 +77,7 @@ export const Slide01: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#1a3328" }}>
       <img
-        src="../assets/img_001.png"
+        src="../picture/images/img_001.png"
         style={{ opacity }}
       />
       <h1 style={{ opacity }}>

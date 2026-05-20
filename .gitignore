@@ -22,3 +22,8 @@ Thumbs.db
 .env
 .env.local
 credentials.json
+
+# Generated workflow outputs
+output/
+36kr_debug/
+node_modules/
